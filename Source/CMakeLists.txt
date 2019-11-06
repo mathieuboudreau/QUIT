@@ -9,3 +9,11 @@ add_subdirectory( Relaxometry )
 add_subdirectory( Stats )
 add_subdirectory( Susceptibility )
 add_subdirectory( Utils )
+
+if ( ${BUILD_MT} )
+    add_compile_options("-DBUILD_MT")
+endif()
+
+add_executable(qi qi_main.cpp ${MT_SOURCES})
+target_link_libraries(qi qi_sequences qi_imageio qi_core ${ITK_LIBRARIES} ${CERES_LIBRARIES})
+install( TARGETS qi RUNTIME DESTINATION bin )

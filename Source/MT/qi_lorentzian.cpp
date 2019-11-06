@@ -176,7 +176,7 @@ template <int N> void Process() {
     }
 }
 
-int main(int argc, char **argv) {
+int lorentzian_main(int argc, char **argv) {
     Eigen::initParallel();
 
     QI::ParseArgs(parser, argc, argv, verbose, threads);

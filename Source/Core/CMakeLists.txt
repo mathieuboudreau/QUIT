@@ -8,6 +8,7 @@ set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/${VERSION_FILE_NAME} PRO
 add_library( qi_core
              Macro.h ImageTypes.h
              ModelFitFilter.h ModelSimFilter.h SimulateModel.h
+             ModelHelpers.cpp ModelHelpers.h
              Args.cpp Util.cpp Log.h JSON.cpp Monitor.cpp
              GoldenSection.cpp Masking.cpp
              Kernels.cpp Fit.cpp Spline.cpp
