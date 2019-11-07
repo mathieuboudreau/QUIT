@@ -12,8 +12,8 @@
 #ifndef QI_TWOPOOLMODEL_H
 #define QI_TWOPOOLMODEL_H
 
-#include "../Sequences/SSFPSequence.h"
 #include "SPGRSequence.h"
+#include "SSFPSequence.h"
 #include "SequenceGroup.h"
 #include <Eigen/Core>
 #include <array>

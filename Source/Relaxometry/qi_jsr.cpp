@@ -14,13 +14,13 @@
 
 // #define QI_DEBUG_BUILD 1
 
-#include "../Sequences/SPGRSequence.h"
-#include "../Sequences/SSFPSequence.h"
 #include "Args.h"
 #include "ImageIO.h"
 #include "Macro.h"
 #include "Model.h"
 #include "ModelFitFilter.h"
+#include "SPGRSequence.h"
+#include "SSFPSequence.h"
 #include "Util.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"

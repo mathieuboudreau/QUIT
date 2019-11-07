@@ -12,9 +12,9 @@
 #ifndef QI_SPGRSIGNAL_H
 #define QI_SPGRSIGNAL_H
 
-#include "../Sequences/MPRAGESequence.h"
-#include "../Sequences/SPGRSequence.h"
+#include "MPRAGESequence.h"
 #include "Macro.h"
+#include "SPGRSequence.h"
 #include <Eigen/Core>
 
 namespace QI {

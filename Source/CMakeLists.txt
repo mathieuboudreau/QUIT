@@ -1,5 +1,5 @@
 add_executable(qi qi_main.cpp)
-target_link_libraries(qi qi_imageio qi_core ${ITK_LIBRARIES} ${CERES_LIBRARIES})
+target_link_libraries(qi ${ITK_LIBRARIES} ${CERES_LIBRARIES} fmtlib)
 install( TARGETS qi RUNTIME DESTINATION bin )
 
 add_subdirectory( Core )

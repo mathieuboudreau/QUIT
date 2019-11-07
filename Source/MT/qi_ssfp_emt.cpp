@@ -16,10 +16,10 @@
 
 // #define QI_DEBUG_BUILD 1
 
-#include "../Sequences/SSFPSequence.h"
 #include "Args.h"
 #include "ImageIO.h"
 #include "ModelFitFilter.h"
+#include "SSFPSequence.h"
 #include "SimulateModel.h"
 #include "Util.h"
 

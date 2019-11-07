@@ -14,11 +14,11 @@
 
 // #define QI_DEBUG_BUILD 1
 
-#include "../Sequences/MTSatSequence.h"
 #include "Args.h"
 #include "FitFunction.h"
 #include "ImageIO.h"
 #include "JSON.h"
+#include "MTSatSequence.h"
 #include "Model.h"
 #include "ModelFitFilter.h"
 #include "SimulateModel.h"

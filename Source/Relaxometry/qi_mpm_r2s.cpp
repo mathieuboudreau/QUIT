@@ -11,11 +11,11 @@
 
 #include <Eigen/Core>
 
-#include "../Sequences/MultiEchoSequence.h"
 #include "Args.h"
 #include "ImageIO.h"
 #include "Model.h"
 #include "ModelFitFilter.h"
+#include "MultiEchoSequence.h"
 #include "Util.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"

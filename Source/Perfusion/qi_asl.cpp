@@ -11,8 +11,8 @@
 
 #include <Eigen/Core>
 
-#include "../Sequences/CASLSequence.h"
 #include "Args.h"
+#include "CASLSequence.h"
 #include "ImageIO.h"
 #include "Util.h"
 #include "itkImageRegionConstIterator.h"

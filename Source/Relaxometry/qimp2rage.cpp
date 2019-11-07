@@ -20,10 +20,10 @@
 #include "itkUnaryGeneratorImageFilter.h"
 
 // #define QI_DEBUG_BUILD 1
-#include "../Sequences/MPRAGESequence.h"
 #include "Args.h"
 #include "ImageIO.h"
 #include "ImageTypes.h"
+#include "MPRAGESequence.h"
 #include "Masking.h"
 #include "Spline.h"
 #include "Util.h"

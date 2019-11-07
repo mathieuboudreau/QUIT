@@ -14,7 +14,7 @@
 #include <Eigen/Core>
 #include <array>
 
-#include "../Sequences/SSFPSequence.h"
+#include "SSFPSequence.h"
 #include "Args.h"
 #include "FitFunction.h"
 #include "ImageIO.h"

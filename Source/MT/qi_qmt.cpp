@@ -13,11 +13,11 @@
 #include <Eigen/Core>
 
 // #define QI_DEBUG_BUILD 1
-#include "../Sequences/MTSatSequence.h"
 #include "Args.h"
 #include "FitFunction.h"
 #include "ImageIO.h"
 #include "Lineshape.h"
+#include "MTSatSequence.h"
 #include "Macro.h"
 #include "Model.h"
 #include "ModelFitFilter.h"

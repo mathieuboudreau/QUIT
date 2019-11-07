@@ -12,9 +12,9 @@
 #ifndef QI_THREEPOOLMODEL_H
 #define QI_THREEPOOLMODEL_H
 
-#include "../Sequences/SSFPSequence.h"
 #include "OnePoolSignals.h"
 #include "SPGRSequence.h"
+#include "SSFPSequence.h"
 #include "SequenceGroup.h"
 #include "TwoPoolModel.h"
 #include <Eigen/Core>

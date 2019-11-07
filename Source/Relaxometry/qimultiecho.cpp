@@ -15,12 +15,12 @@
 #include "ceres/ceres.h"
 #include <Eigen/Core>
 
-#include "../Sequences/MultiEchoSequence.h"
 #include "Args.h"
 #include "FitFunction.h"
 #include "ImageIO.h"
 #include "Model.h"
 #include "ModelFitFilter.h"
+#include "MultiEchoSequence.h"
 #include "SimulateModel.h"
 #include "Util.h"
 
