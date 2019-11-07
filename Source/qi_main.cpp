@@ -1,6 +1,7 @@
 #include "Log.h"
 
 #include "B1/b1.h"
+#include "CoreProgs/coreprogs.h"
 #include "MT/mt.h"
 
 using MainFunc = std::function<int(int, char **)>;
@@ -9,6 +10,7 @@ int main(int argc, char **argv) {
 
     std::map<std::string, MainFunc> commands;
 
+    add_core_commands(commands);
 #ifdef BUILD_B1
     add_b1_commands(commands);
 #endif
