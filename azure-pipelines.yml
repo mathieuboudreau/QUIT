@@ -19,6 +19,14 @@ jobs:
   - bash: export PATH="$PWD/../../install/bin:$PATH"; echo $PATH; python -m unittest discover
     displayName: 'Run Python Tests'
     workingDirectory: Python/Tests
+  - task: GithubRelease@0
+    displayName: 'Create GitHub Release for Mac'
+    inputs:
+      action: Create
+      gitHubConnection: spinicist
+      repositoryName: spinicist/QUIT
+      releaseTitle: v$(Build.SourceBranchName)
+      assets: $(Build.Repository.LocalPath)/Source/qi
 - job: LinuxGCC
   pool:
     vmImage: 'ubuntu-16.04'
@@ -36,4 +44,12 @@ jobs:
     workingDirectory: Python
   - bash: export PATH="$PWD/../../install/bin:$PATH"; echo $PATH; python -m unittest discover
     displayName: 'Run Python Tests'
-    workingDirectory: Python/Tests 
+    workingDirectory: Python/Tests
+  - task: GithubRelease@0
+    displayName: 'Create GitHub Release for Linux'
+    inputs:
+      action: Create
+      gitHubConnection: spinicist
+      repositoryName: spinicist/QUIT
+      releaseTitle: v$(Build.SourceBranchName)
+      assets: $(Build.Repository.LocalPath)/Source/qi
