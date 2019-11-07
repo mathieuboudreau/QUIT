@@ -14,12 +14,12 @@
 #include <Eigen/Core>
 #include <array>
 
+#include "../Sequences/SSFPSequence.h"
 #include "Args.h"
 #include "FitFunction.h"
 #include "ImageIO.h"
 #include "Model.h"
 #include "ModelFitFilter.h"
-#include "SSFPSequence.h"
 #include "SimulateModel.h"
 #include "Util.h"
 
@@ -145,7 +145,7 @@ struct FMNLLS : FMFit {
 //******************************************************************************
 // Main
 //******************************************************************************
-int main(int argc, char **argv) {
+int despot2fm_main(int argc, char **argv) {
     Eigen::initParallel();
     args::ArgumentParser parser(
         "Calculates a T2 map from SSFP data and a T1 map.\nhttp://github.com/spinicist/QUIT");

@@ -14,13 +14,13 @@
 
 // #define QI_DEBUG_BUILD 1
 
+#include "../Sequences/SPGRSequence.h"
+#include "../Sequences/SSFPSequence.h"
 #include "Args.h"
 #include "ImageIO.h"
 #include "Macro.h"
 #include "Model.h"
 #include "ModelFitFilter.h"
-#include "SPGRSequence.h"
-#include "SSFPSequence.h"
 #include "Util.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
@@ -274,7 +274,7 @@ struct JSRFit {
 /*
  * Main
  */
-int main(int argc, char **argv) {
+int jsr_main(int argc, char **argv) {
     Eigen::initParallel();
     args::ArgumentParser          parser("Calculates T1/T2 from simultaneous fit to SPGR/SSFP "
                                 "data.\nhttp://github.com/spinicist/QUIT");

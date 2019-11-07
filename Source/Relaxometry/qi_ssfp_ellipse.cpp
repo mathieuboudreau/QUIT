@@ -11,10 +11,10 @@
 
 #include <Eigen/Core>
 
+#include "../Sequences/SSFPSequence.h"
 #include "Args.h"
 #include "ImageIO.h"
 #include "ModelFitFilter.h"
-#include "SSFPSequence.h"
 #include "SimulateModel.h"
 #include "Util.h"
 
@@ -189,7 +189,7 @@ struct EllipseFit {
     }
 };
 
-int main(int argc, char **argv) {
+int ssfp_ellipse_main(int argc, char **argv) {
     Eigen::initParallel();
     args::ArgumentParser parser(
         "Calculates the ellipse parameters G,a,b,f0 & psi0 from sequence data.\nInput must be "

@@ -1,4 +1,2 @@
-file(GLOB_RECURSE COREPROGS_SOURCES 
-    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/../ *.cpp
-)
-target_sources(qi PRIVATE ${COREPROGS_SOURCES})
+file(GLOB SOURCES *.cpp)
+target_sources(qi PRIVATE ${SOURCES})

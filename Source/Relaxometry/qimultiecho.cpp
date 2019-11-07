@@ -15,12 +15,12 @@
 #include "ceres/ceres.h"
 #include <Eigen/Core>
 
+#include "../Sequences/MultiEchoSequence.h"
 #include "Args.h"
 #include "FitFunction.h"
 #include "ImageIO.h"
 #include "Model.h"
 #include "ModelFitFilter.h"
-#include "MultiEchoSequence.h"
 #include "SimulateModel.h"
 #include "Util.h"
 
@@ -155,7 +155,7 @@ struct MultiEchoNLLS : MultiEchoFit {
 //******************************************************************************
 // Main
 //******************************************************************************
-int main(int argc, char **argv) {
+int multiecho_main(int argc, char **argv) {
     Eigen::initParallel();
     args::ArgumentParser parser(
         "Calculates T2/T2* maps from multi-echo data\nhttp://github.com/spinicist/QUIT");

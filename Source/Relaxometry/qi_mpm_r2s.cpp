@@ -11,11 +11,11 @@
 
 #include <Eigen/Core>
 
+#include "../Sequences/MultiEchoSequence.h"
 #include "Args.h"
 #include "ImageIO.h"
 #include "Model.h"
 #include "ModelFitFilter.h"
-#include "MultiEchoSequence.h"
 #include "Util.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
@@ -196,7 +196,7 @@ struct MPMFit {
 /*
  * Main
  */
-int main(int argc, char **argv) {
+int mpm_r2s_main(int argc, char **argv) {
     Eigen::initParallel();
     args::ArgumentParser parser(
         "Calculates R2* and S0 from PDw, T1w, MTw data.\nhttp://github.com/spinicist/QUIT");

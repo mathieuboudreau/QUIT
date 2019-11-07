@@ -13,10 +13,10 @@
 
 #include <Eigen/Core>
 
+#include "../Sequences/SSFPSequence.h"
 #include "Args.h"
 #include "ImageIO.h"
 #include "ModelFitFilter.h"
-#include "SSFPSequence.h"
 #include "SimulateModel.h"
 #include "Util.h"
 
@@ -101,7 +101,7 @@ struct PLANETFit {
     }
 };
 
-int main(int argc, char **argv) {
+int planet_main(int argc, char **argv) {
     args::ArgumentParser parser(
         "Calculates T1&T2 from SSFP Ellipse Parameters.\nhttp://github.com/spinicist/QUIT");
 

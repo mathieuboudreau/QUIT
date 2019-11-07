@@ -1,8 +1,13 @@
 #include "Log.h"
 
-#include "B1/b1.h"
-#include "CoreProgs/coreprogs.h"
-#include "MT/mt.h"
+#include "B1/Commands.h"
+#include "CoreProgs/Commands.h"
+#include "MT/Commands.h"
+#include "Perfusion/Commands.h"
+#include "Relaxometry/Commands.h"
+#include "Stats/Commands.h"
+#include "Susceptibility/Commands.h"
+#include "Utils/Commands.h"
 
 using MainFunc = std::function<int(int, char **)>;
 
@@ -16,6 +21,21 @@ int main(int argc, char **argv) {
 #endif
 #ifdef BUILD_MT
     add_mt_commands(commands);
+#endif
+#ifdef BUILD_PERFUSION
+    add_perfusion_commands(commands);
+#endif
+#ifdef BUILD_RELAX
+    add_relax_commands(commands);
+#endif
+#ifdef BUILD_STATS
+    add_stats_commands(commands);
+#endif
+#ifdef BUILD_SUSCEP
+    add_suscep_commands(commands);
+#endif
+#ifdef BUILD_UTILS
+    add_utils(commands);
 #endif
 
     auto print_command_list = [&commands]() {

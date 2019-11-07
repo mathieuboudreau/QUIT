@@ -11,9 +11,9 @@
 
 #include <Eigen/Core>
 
+#include "../Sequences/SequenceBase.h"
 #include "Args.h"
 #include "ImageIO.h"
-#include "SequenceBase.h"
 #include "Util.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
