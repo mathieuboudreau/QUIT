@@ -6,8 +6,7 @@ target_compile_options(
     "-ftemplate-backtrace-limit=30"
     ${ASAN}
 )
-target_link_options(qi PRIVATE ${ASAN})
-target_link_libraries(qi ${ITK_LIBRARIES} ${CERES_LIBRARIES} fmtlib)
+target_link_libraries(qi ${ITK_LIBRARIES} ${CERES_LIBRARIES} fmtlib ${ASAN})
 install( TARGETS qi RUNTIME DESTINATION bin )
 
 add_subdirectory( Core )

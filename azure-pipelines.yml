@@ -26,7 +26,7 @@ jobs:
       gitHubConnection: GitHub Spinicist
       repositoryName: spinicist/QUIT
       releaseTitle: $(Build.SourceBranchName)
-      assets: $(Build.Repository.LocalPath)/build/Source/qi
+      assets: $(Build.Repository.LocalPath)/_build/Source/qi
 - job: LinuxGCC
   pool:
     vmImage: 'ubuntu-18.04'
@@ -52,4 +52,4 @@ jobs:
       gitHubConnection: GitHub Spinicist
       repositoryName: spinicist/QUIT
       releaseTitle: $(Build.SourceBranchName)
-      assets: $(Build.Repository.LocalPath)/build/Source/qi
+      assets: $(Build.Repository.LocalPath)/_build/Source/qi
