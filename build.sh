@@ -81,7 +81,7 @@ cd $EXTERNAL
 # These are header only, no building required
 EIGEN_DIR="$EXTERNAL/eigen"
 ARGS_DIR="$EXTERNAL/args"
-BUILD_DIR="_build"
+BUILD_DIR="build"
 CXX_STANDARD="-DCMAKE_CXX_STANDARD=17"
 
 # Ceres

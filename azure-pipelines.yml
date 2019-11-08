@@ -26,10 +26,10 @@ jobs:
       gitHubConnection: GitHub Spinicist
       repositoryName: spinicist/QUIT
       releaseTitle: $(Build.SourceBranchName)
-      assets: $(Build.Repository.LocalPath)/Source/qi
+      assets: $(Build.Repository.LocalPath)/build/Source/qi
 - job: LinuxGCC
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-18.04'
   steps:
   - task: UsePythonVersion@0
     inputs:
@@ -52,4 +52,4 @@ jobs:
       gitHubConnection: GitHub Spinicist
       repositoryName: spinicist/QUIT
       releaseTitle: $(Build.SourceBranchName)
-      assets: $(Build.Repository.LocalPath)/Source/qi
+      assets: $(Build.Repository.LocalPath)/build/Source/qi
