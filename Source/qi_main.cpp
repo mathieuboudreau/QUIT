@@ -9,6 +9,9 @@
 #include "Susceptibility/Commands.h"
 #include "Utils/Commands.h"
 
+#include <functional>
+#include <numeric>
+
 using MainFunc = std::function<int(int, char **)>;
 
 int main(int argc, char **argv) {
@@ -39,10 +42,23 @@ int main(int argc, char **argv) {
 #endif
 
     auto print_command_list = [&commands]() {
-        QI::Log(true, "Available commands:");
+        fmt::print("Available commands:\n");
+        auto max_width =
+            std::transform_reduce(commands.begin(),
+                                  commands.end(),
+                                  0,
+                                  [](size_t const &a, size_t const &b) { return std::max(a, b); },
+                                  [](auto const &kv_pair) { return kv_pair.first.size(); });
+        auto num_printed = 0;
+        fmt::print("  ");
         for (auto const &kv_pair : commands) {
-            QI::Log(true, "\t{}", kv_pair.first);
+            fmt::print("{:<{}}", kv_pair.first, max_width + 1);
+            num_printed++;
+            if (num_printed % 5 == 0) {
+                fmt::print("\n  ");
+            }
         }
+        fmt::print("\n");
     };
 
     if (argc < 2) {
