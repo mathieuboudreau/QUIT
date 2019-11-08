@@ -69,4 +69,4 @@ jobs:
       target: '$(Build.SourceVersion)'
       repositoryName: 'spinicist/QUIT'
       releaseTitle: '$(Build.SourceBranchName)'
-      assets: ['$(System.ArtifactsDirectory)/mac/qi','$(System.ArtifactsDirectory)/linux/qi']
+      assets: '$(System.ArtifactsDirectory)/*/qi'
