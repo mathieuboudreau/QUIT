@@ -10,7 +10,6 @@
 #include "Utils/Commands.h"
 
 #include <functional>
-#include <numeric>
 
 using MainFunc = std::function<int(int, char **)>;
 
@@ -43,12 +42,13 @@ int main(int argc, char **argv) {
 
     auto print_command_list = [&commands]() {
         fmt::print("Available commands:\n");
-        auto max_width =
-            std::transform_reduce(commands.begin(),
-                                  commands.end(),
-                                  0,
-                                  [](size_t const &a, size_t const &b) { return std::max(a, b); },
-                                  [](auto const &kv_pair) { return kv_pair.first.size(); });
+        size_t max_width = 0;
+        for (auto const &kv_pair : commands) {
+            auto const &this_width = kv_pair.first.size();
+            if (this_width > max_width) {
+                max_width = this_width;
+            }
+        }
         auto num_printed = 0;
         fmt::print("  ");
         for (auto const &kv_pair : commands) {
