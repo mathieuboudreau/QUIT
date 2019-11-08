@@ -68,7 +68,7 @@ jobs:
     displayName: 'Create GitHub Release'
     inputs:
       gitHubConnection: GitHub Spinicist
-      action: 'create'
+      action: 'edit'
       target: '$(Build.SourceVersion)'
       tagSource: 'auto'
       tag: '$(Build.SourceBranchName)'
