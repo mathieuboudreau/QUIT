@@ -53,7 +53,7 @@ jobs:
     displayName: 'Copy binary'
     workingDirectory: build/Source
     condition: succeeded()
--job: Release
+- job: Release
   pool:
     vmImage: 'ubuntu-18.04'
   condition: succeeded()
