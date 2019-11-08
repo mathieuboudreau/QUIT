@@ -21,7 +21,7 @@ jobs:
     workingDirectory: Python/Tests
   - bash: mkdir $(Build.ArtifactStagingDirectory)/mac; cp qi $(Build.ArtifactStagingDirectory)/mac/
     displayName: 'Copy binary'
-    workingDirectory: build/Source
+    workingDirectory: _build/Source
     condition: succeeded()
 - job: LinuxGCC
   pool:
@@ -51,7 +51,7 @@ jobs:
       assets: $(Build.Repository.LocalPath)/_build/Source/qi
   - bash: mkdir $(Build.ArtifactStagingDirectory)/linux; cp qi $(Build.ArtifactStagingDirectory)/linux/
     displayName: 'Copy binary'
-    workingDirectory: build/Source
+    workingDirectory: _build/Source
     condition: succeeded()
 - job: Release
   pool:
