@@ -57,6 +57,9 @@ jobs:
   pool:
     vmImage: 'ubuntu-18.04'
   condition: succeeded()
+  dependsOn:
+    - macOS
+    - LinuxGCC
   steps:
   - task: DownloadPipelineArtifact@2
     inputs:
@@ -65,8 +68,10 @@ jobs:
     displayName: 'Create GitHub Release'
     inputs:
       gitHubConnection: GitHub Spinicist
-      action: 'edit'
+      action: 'create'
       target: '$(Build.SourceVersion)'
+      tagSource: 'auto'
+      tag: '$(Build.SourceBranchName)'
       repositoryName: 'spinicist/QUIT'
       releaseTitle: '$(Build.SourceBranchName)'
       assets: '$(System.ArtifactsDirectory)/*/qi'
