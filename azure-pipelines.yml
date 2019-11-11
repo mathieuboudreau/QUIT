@@ -64,6 +64,8 @@ jobs:
   - task: DownloadPipelineArtifact@2
     inputs:
       path: '$(System.ArtifactsDirectory)'
+  - bash: ls $(System.ArtifactsDirectory)
+    displayName: 'Check For Artifacts'
   - task: GithubRelease@0
     displayName: 'Create GitHub Release'
     inputs:
