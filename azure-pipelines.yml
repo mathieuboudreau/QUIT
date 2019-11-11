@@ -29,8 +29,8 @@ jobs:
       gitHubConnection: GitHub Spinicist
       action: 'edit'
       target: '$(Build.SourceVersion)'
-      tagSource: 'auto'
-      tag: '$(Build.SourceBranchName)'
+      tagSource: 'git tag'
+      tag: '$(tagName)'
       repositoryName: 'spinicist/QUIT'
       releaseTitle: '$(Build.SourceBranchName)'
       assetUploadMode: 'replace'
@@ -63,8 +63,8 @@ jobs:
       gitHubConnection: GitHub Spinicist
       action: 'edit'
       target: '$(Build.SourceVersion)'
-      tagSource: 'auto'
-      tag: '$(Build.SourceBranchName)'
+      tagSource: 'git tag'
+      tag: '$(tagName)'
       repositoryName: 'spinicist/QUIT'
       releaseTitle: '$(Build.SourceBranchName)'
       assetUploadMode: 'replace'
