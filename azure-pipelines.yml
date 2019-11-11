@@ -3,6 +3,9 @@ jobs:
   pool:
     vmImage: 'macOS-10.14'
   steps:
+  - bash: echo "##vso[task.setvariable variable=TAG]${BUILD_SOURCEBRANCH##refs/tags/}"
+    displayName: Set TAG variable
+    condition: startswith(variables['Build.SourceBranch'], 'refs/tags/')
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '3.6'
@@ -23,9 +26,6 @@ jobs:
     displayName: 'Copy binary'
     workingDirectory: _build/Source
     condition: succeeded()
-  - bash: echo "##vso[task.setvariable variable=TAG]${BUILD_SOURCEBRANCH##refs/tags/}"
-    displayName: Set TAG variable
-    condition: startswith(variables['Build.SourceBranch'], 'refs/tags/')
   - task: GithubRelease@0
     displayName: 'Create Mac GitHub Release'
     inputs:
@@ -41,6 +41,9 @@ jobs:
   pool:
     vmImage: 'ubuntu-18.04'
   steps:
+  - bash: echo "##vso[task.setvariable variable=TAG]${BUILD_SOURCEBRANCH##refs/tags/}"
+    displayName: Set TAG variable
+    condition: startswith(variables['Build.SourceBranch'], 'refs/tags/')
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '3.6'
@@ -59,9 +62,6 @@ jobs:
     displayName: 'Copy binary'
     workingDirectory: _build/Source
     condition: succeeded()
-  - bash: echo "##vso[task.setvariable variable=TAG]${BUILD_SOURCEBRANCH##refs/tags/}"
-    displayName: Set TAG variable
-    condition: startswith(variables['Build.SourceBranch'], 'refs/tags/')
   - task: GithubRelease@0
     displayName: 'Create Linux GitHub Release'
     inputs:
