@@ -23,6 +23,17 @@ jobs:
     displayName: 'Copy binary'
     workingDirectory: _build/Source
     condition: succeeded()
+  - task: GithubRelease@0
+    displayName: 'Create Mac GitHub Release'
+    inputs:
+      gitHubConnection: GitHub Spinicist
+      action: 'edit'
+      target: '$(Build.SourceVersion)'
+      tagSource: 'auto'
+      tag: '$(Build.SourceBranchName)'
+      repositoryName: 'spinicist/QUIT'
+      releaseTitle: '$(Build.SourceBranchName)'
+      assets: '$(System.ArtifactsDirectory)/qi_mac.tar.gz'
 - job: LinuxGCC
   pool:
     vmImage: 'ubuntu-18.04'
@@ -53,21 +64,8 @@ jobs:
     displayName: 'Copy binary'
     workingDirectory: _build/Source
     condition: succeeded()
-- job: Release
-  pool:
-    vmImage: 'ubuntu-18.04'
-  condition: succeeded()
-  dependsOn:
-    - macOS
-    - LinuxGCC
-  steps:
-  # - task: DownloadPipelineArtifact@2
-  #   inputs:
-  #     path: '$(System.ArtifactsDirectory)'
-  - bash: ls $(System.ArtifactsDirectory)
-    displayName: 'Check For Artifacts'
   - task: GithubRelease@0
-    displayName: 'Create GitHub Release'
+    displayName: 'Create Linux GitHub Release'
     inputs:
       gitHubConnection: GitHub Spinicist
       action: 'edit'
@@ -76,4 +74,4 @@ jobs:
       tag: '$(Build.SourceBranchName)'
       repositoryName: 'spinicist/QUIT'
       releaseTitle: '$(Build.SourceBranchName)'
-      assets: '$(System.ArtifactsDirectory)/*'
+      assets: '$(System.ArtifactsDirectory)/qi_linux.tar.gz'
