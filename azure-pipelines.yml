@@ -19,7 +19,7 @@ jobs:
   - bash: export PATH="$PWD/../../install/bin:$PATH"; echo $PATH; python -m unittest discover
     displayName: 'Run Python Tests'
     workingDirectory: Python/Tests
-  - bash: mkdir $(Build.ArtifactStagingDirectory)/mac; tar -cvzf $(Build.ArtifactStagingDirectory)/qi_mac.tar.gz qi; cd $(Build.ArtifactStagingDirectory); pwd; ls *
+  - bash: tar -cvzf $(System.ArtifactsDirectory))/qi_mac.tar.gz qi; cd $(System.ArtifactsDirectory); pwd; ls *
     displayName: 'Copy binary'
     workingDirectory: _build/Source
     condition: succeeded()
@@ -49,7 +49,7 @@ jobs:
       repositoryName: spinicist/QUIT
       releaseTitle: $(Build.SourceBranchName)
       assets: $(Build.Repository.LocalPath)/_build/Source/qi
-  - bash: mkdir $(Build.ArtifactStagingDirectory)/linux; tar -cvzf $(Build.ArtifactStagingDirectory)/qi_linux.tar.gz qi; cd $(Build.ArtifactStagingDirectory); pwd; ls *
+  - bash: tar -cvzf $(System.ArtifactsDirectory)/qi_linux.tar.gz qi; cd $(System.ArtifactsDirectory); pwd; ls *
     displayName: 'Copy binary'
     workingDirectory: _build/Source
     condition: succeeded()
@@ -61,9 +61,9 @@ jobs:
     - macOS
     - LinuxGCC
   steps:
-  - task: DownloadPipelineArtifact@2
-    inputs:
-      path: '$(System.ArtifactsDirectory)'
+  # - task: DownloadPipelineArtifact@2
+  #   inputs:
+  #     path: '$(System.ArtifactsDirectory)'
   - bash: ls $(System.ArtifactsDirectory)
     displayName: 'Check For Artifacts'
   - task: GithubRelease@0
