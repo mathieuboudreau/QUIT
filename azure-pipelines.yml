@@ -19,7 +19,7 @@ jobs:
   - bash: export PATH="$PWD/../../install/bin:$PATH"; echo $PATH; python -m unittest discover
     displayName: 'Run Python Tests'
     workingDirectory: Python/Tests
-  - bash: mkdir $(Build.ArtifactStagingDirectory)/mac; cp qi $(Build.ArtifactStagingDirectory)/qi_mac
+  - bash: mkdir $(Build.ArtifactStagingDirectory)/mac; tar -cvzf $(Build.ArtifactStagingDirectory)/qi_mac.tar.gz qi; cd $(Build.ArtifactStagingDirectory); pwd; ls *
     displayName: 'Copy binary'
     workingDirectory: _build/Source
     condition: succeeded()
@@ -49,7 +49,7 @@ jobs:
       repositoryName: spinicist/QUIT
       releaseTitle: $(Build.SourceBranchName)
       assets: $(Build.Repository.LocalPath)/_build/Source/qi
-  - bash: mkdir $(Build.ArtifactStagingDirectory)/linux; cp qi $(Build.ArtifactStagingDirectory)/qi_linux
+  - bash: mkdir $(Build.ArtifactStagingDirectory)/linux; tar -cvzf $(Build.ArtifactStagingDirectory)/qi_linux.tar.gz qi; cd $(Build.ArtifactStagingDirectory); pwd; ls *
     displayName: 'Copy binary'
     workingDirectory: _build/Source
     condition: succeeded()
