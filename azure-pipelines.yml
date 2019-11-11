@@ -53,14 +53,6 @@ jobs:
   - bash: export PATH="$PWD/../../install/bin:$PATH"; echo $PATH; python -m unittest discover
     displayName: 'Run Python Tests'
     workingDirectory: Python/Tests
-  - task: GithubRelease@0
-    displayName: 'Create GitHub Release for Linux'
-    inputs:
-      action: Create
-      gitHubConnection: GitHub Spinicist
-      repositoryName: spinicist/QUIT
-      releaseTitle: $(Build.SourceBranchName)
-      assets: $(Build.Repository.LocalPath)/_build/Source/qi
   - bash: tar -cvzf $(Build.ArtifactStagingDirectory)/qi_linux.tgz qi
     displayName: 'Copy binary'
     workingDirectory: _build/Source
