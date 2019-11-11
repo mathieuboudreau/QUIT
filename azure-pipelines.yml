@@ -19,7 +19,7 @@ jobs:
   - bash: export PATH="$PWD/../../install/bin:$PATH"; echo $PATH; python -m unittest discover
     displayName: 'Run Python Tests'
     workingDirectory: Python/Tests
-  - bash: tar -cvzf $(System.ArtifactsDirectory))/qi_mac.tar.gz qi; cd $(System.ArtifactsDirectory); pwd; ls *
+  - bash: tar -cvzf $(System.ArtifactsDirectory)/qi_mac.tar.gz qi; cd $(System.ArtifactsDirectory); pwd; ls *
     displayName: 'Copy binary'
     workingDirectory: _build/Source
     condition: succeeded()
