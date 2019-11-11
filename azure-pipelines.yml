@@ -19,7 +19,7 @@ jobs:
   - bash: export PATH="$PWD/../../install/bin:$PATH"; echo $PATH; python -m unittest discover
     displayName: 'Run Python Tests'
     workingDirectory: Python/Tests
-  - bash: tar -cvzf $(System.ArtifactsDirectory)/qi_mac.tar.gz qi; cd $(System.ArtifactsDirectory); pwd; ls *
+  - bash: tar -cvzf $(Build.ArtifactStagingDirectory)/qi_mac.tgz qi
     displayName: 'Copy binary'
     workingDirectory: _build/Source
     condition: succeeded()
@@ -33,7 +33,8 @@ jobs:
       tag: '$(Build.SourceBranchName)'
       repositoryName: 'spinicist/QUIT'
       releaseTitle: '$(Build.SourceBranchName)'
-      assets: '$(System.ArtifactsDirectory)/qi_mac.tar.gz'
+      assetUploadMode: 'replace'
+      addChangeLog: false
 - job: LinuxGCC
   pool:
     vmImage: 'ubuntu-18.04'
@@ -60,7 +61,7 @@ jobs:
       repositoryName: spinicist/QUIT
       releaseTitle: $(Build.SourceBranchName)
       assets: $(Build.Repository.LocalPath)/_build/Source/qi
-  - bash: tar -cvzf $(System.ArtifactsDirectory)/qi_linux.tar.gz qi; cd $(System.ArtifactsDirectory); pwd; ls *
+  - bash: tar -cvzf $(Build.ArtifactStagingDirectory)/qi_linux.tgz qi
     displayName: 'Copy binary'
     workingDirectory: _build/Source
     condition: succeeded()
@@ -74,4 +75,5 @@ jobs:
       tag: '$(Build.SourceBranchName)'
       repositoryName: 'spinicist/QUIT'
       releaseTitle: '$(Build.SourceBranchName)'
-      assets: '$(System.ArtifactsDirectory)/qi_linux.tar.gz'
+      assetUploadMode: 'replace'
+      addChangeLog: false
