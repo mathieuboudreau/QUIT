@@ -848,3 +848,51 @@ class PLANETSim(QI.SimCommand):
         outputs['a_file'] = path.abspath(self.inputs.a_file)
         outputs['b_file'] = path.abspath(self.inputs.b_file)
         return outputs
+
+############################ vfa-prep ############################
+
+
+class VFAPrepInputSpec(QI.FitInputSpec):
+    # Inputs - none
+
+    # Options - none. Yet
+    pass
+
+
+class VFAPrepOutputSpec(TraitedSpec):
+    pd_map = File('VFAPrep_PD.nii.gz', desc="Path to PD map", usedefault=True)
+    t1_map = File('VFAPrep_T1.nii.gz', desc="Path to T1 map", usedefault=True)
+    t2_map = File('VFAPrep_T2.nii.gz', desc="Path to T2 map", usedefault=True)
+    b1_map = File('VFAPrep_B1.nii.gz', desc="Path to B1 map", usedefault=True)
+    rmse_map = File('VFAPrep_rmse.nii.gz',
+                    desc="Path to residual map", usedefault=True)
+
+
+class VFAPrep(QI.FitCommand):
+    """
+    Run VFA-Prep Analysis
+
+    """
+
+    _cmd = 'qi vfa-prep'
+    input_spec = VFAPrepInputSpec
+    output_spec = VFAPrepOutputSpec
+
+
+class VFAPrepSimInputSpec(QI.SimInputSpec):
+    # Inputs
+
+    # Options
+    pass
+
+
+class VFAPrepSim(QI.SimCommand):
+    """
+    Run DESPOT2-FM simulation
+
+    """
+
+    _cmd = 'qi vfa-prep'
+    _param_files = ['PD', 'T1', 'T2', 'B1']
+    input_spec = VFAPrepSimInputSpec
+    output_spec = QI.SimOutputSpec

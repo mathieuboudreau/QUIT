@@ -1,7 +1,7 @@
 import unittest
 from nipype.interfaces.base import CommandLine
 from QUIT.core import NewImage, Diff
-from QUIT.relaxometry import Multiecho, MultiechoSim
+from QUIT.relaxometry import Multiecho, MultiechoSim, VFAPrep, VFAPrepSim
 
 vb = True
 CommandLine.terminal_output = 'allatonce'
@@ -31,6 +31,41 @@ class Relax(unittest.TestCase):
                        noise=noise, verbose=vb).run()
         self.assertLessEqual(diff_T2.outputs.out_diff, 3)
         self.assertLessEqual(diff_PD.outputs.out_diff, 2)
+
+    def test_vfaprep(self):
+        seq = {'VFAPrep': {'TR': 0.002786, 'TE': 0.03, 'SPS': 128, 'FA': 2,
+                           'PrepFA': [1, 15, 30, 45, 60, 90]}}
+        sim_file = 'sim_vfa.nii.gz'
+        img_sz = [32, 32, 32]
+        noise = 0.001
+
+        NewImage(img_size=img_sz, fill=1.0,
+                 out_file='PD.nii.gz', verbose=vb).run()
+        NewImage(img_size=img_sz, grad_dim=0, grad_vals=(0.8, 1.5),
+                 out_file='T1.nii.gz', verbose=vb).run()
+        NewImage(img_size=img_sz, grad_dim=1, grad_vals=(0.04, 0.1),
+                 out_file='T2.nii.gz', verbose=vb).run()
+        NewImage(img_size=img_sz, grad_dim=2, grad_vals=(0.5, 1.5),
+                 out_file='B1.nii.gz', verbose=vb).run()
+
+        VFAPrepSim(sequence=seq, in_file=sim_file,
+                   PD='PD.nii.gz', T1='T1.nii.gz', T2='T2.nii.gz', B1='B1.nii.gz',
+                   noise=noise, verbose=vb).run()
+        VFAPrep(sequence=seq, in_file=sim_file, verbose=vb).run()
+
+        diff_PD = Diff(in_file='VFAPrep_PD.nii.gz', baseline='PD.nii.gz',
+                       noise=noise, verbose=vb).run()
+        diff_T1 = Diff(in_file='VFAPrep_T1.nii.gz', baseline='T1.nii.gz',
+                       noise=noise, verbose=vb).run()
+        diff_T2 = Diff(in_file='VFAPrep_T2.nii.gz', baseline='T2.nii.gz',
+                       noise=noise, verbose=vb).run()
+        diff_B1 = Diff(in_file='VFAPrep_B1.nii.gz', baseline='B1.nii.gz',
+                       noise=noise, verbose=vb).run()
+
+        self.assertLessEqual(diff_PD.outputs.out_diff, 1)
+        self.assertLessEqual(diff_T1.outputs.out_diff, 1)
+        self.assertLessEqual(diff_T2.outputs.out_diff, 1)
+        self.assertLessEqual(diff_B1.outputs.out_diff, 1)
 
 
 if __name__ == '__main__':
