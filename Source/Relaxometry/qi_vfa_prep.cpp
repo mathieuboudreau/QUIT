@@ -26,26 +26,32 @@
 #include "Util.h"
 
 struct VFAPrepSequence : QI::SequenceBase {
-    double         TE, TR, FA;
+    double         TR;
     int            SPS;
-    Eigen::ArrayXd PrepFA;
+    Eigen::ArrayXd FA, PrepFA, TE;
     QI_SEQUENCE_DECLARE(VFAPrep);
     Eigen::Index size() const override { return PrepFA.size(); };
 };
 void from_json(const json &j, VFAPrepSequence &s) {
-    j.at("TE").get_to(s.TE);
     j.at("TR").get_to(s.TR);
     j.at("SPS").get_to(s.SPS);
-    s.FA     = j.at("FA").get<double>() * M_PI / 180.0;
+    s.FA     = QI::ArrayFromJSON(j, "FA", M_PI / 180.0);
     s.PrepFA = QI::ArrayFromJSON(j, "PrepFA", M_PI / 180.0);
+    s.TE     = QI::ArrayFromJSON(j, "TE");
+    if (!((s.FA.size() == s.PrepFA.size()) && (s.FA.size() == s.TE.size()))) {
+        QI::Fail("Mismatched sizes in VFAPrep. FA={}, PrepFA={}, TE={}",
+                 s.FA.size(),
+                 s.PrepFA.size(),
+                 s.TE.size());
+    }
 }
 
 void to_json(json &j, const VFAPrepSequence &s) {
-    j = json{{"TE", s.TE},
-             {"TR", s.TR},
+    j = json{{"TR", s.TR},
              {"SPS", s.SPS},
              {"FA", s.FA * 180 / M_PI},
-             {"PrepFA", s.PrepFA * 180 / M_PI}};
+             {"PrepFA", s.PrepFA * 180 / M_PI},
+             {"TE", s.TE}};
 }
 
 struct VFAPrepModel {
@@ -66,8 +72,8 @@ struct VFAPrepModel {
     // Fitting start point and bounds
     // The PD will be scaled by the fitting function to keep parameters roughly the same magnitude
     VaryingArray const start{30., 1., 0.05, 1.0};
-    VaryingArray const bounds_lo{1, 0.7, 0.01, 0.5};
-    VaryingArray const bounds_hi{150, 1.5, 3, 1.5};
+    VaryingArray const bounds_lo{1, 0.5, 0.01, 0.5};
+    VaryingArray const bounds_hi{150, 3.0, 3, 1.5};
 
     std::array<std::string, NV> const varying_names{"PD", "T1", "T2", "B1"};
     std::array<std::string, NF> const fixed_names{};
@@ -94,7 +100,7 @@ struct VFAPrepModel {
             return eRt;
         };
 
-        auto const RF = [&](double const a, double const ph) {
+        auto const RF = [&B1](double const a, double const ph) {
             auto const      ca = cos(B1 * a);
             auto const      sa = sin(B1 * a);
             auto const      ux = cos(ph);
@@ -106,19 +112,20 @@ struct VFAPrepModel {
                 0., 0., 0., 1.;
             return A;
         };
-        auto const A     = RF(sequence.FA, 0);
-        auto const R     = Relax(sequence.TR);
-        auto const S     = Eigen::DiagonalMatrix<double, 4, 4>({0, 0, 1., 1.}).toDenseMatrix();
-        auto const RUFIS = A * S * R;
-        auto const seg2  = RUFIS.pow(sequence.SPS / 2.0);
+        auto const R = Relax(sequence.TR);
+        auto const S = Eigen::DiagonalMatrix<double, 4, 4>({0, 0, 1., 1.}).toDenseMatrix();
 
-        auto const gap  = Relax(sequence.TE / 4);
         auto const ref1 = RF(M_PI, M_PI / 2);
         auto const ref2 = RF(-M_PI, M_PI / 2);
         QI_ARRAY(T) signal(sequence.size());
         for (long i = 0; i < sequence.size(); i++) {
+            auto const A     = RF(sequence.FA[i], 0);
+            auto const RUFIS = A * S * R;
+            auto const seg2  = RUFIS.pow(sequence.SPS / 2.0);
+
             auto const tip_down = RF(sequence.PrepFA[i], 0);
             auto const tip_up   = RF(-sequence.PrepFA[i], 0);
+            auto const gap      = Relax(sequence.TE[i] / 4);
             auto const prep     = tip_up * gap * ref2 * gap * gap * ref1 * gap * tip_down;
 
             auto const                X = seg2 * prep * seg2;
