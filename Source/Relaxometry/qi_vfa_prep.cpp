@@ -22,9 +22,8 @@
 #include "Model.h"
 #include "ModelFitFilter.h"
 #include "SequenceBase.h"
+#include "SimulateModel.h"
 #include "Util.h"
-#include "itkImageRegionConstIterator.h"
-#include "itkImageRegionIterator.h"
 
 struct VFAPrepSequence : QI::SequenceBase {
     double         TE, TR, FA;
@@ -53,7 +52,7 @@ struct VFAPrepModel {
     using DataType      = double;
     using ParameterType = double;
 
-    static constexpr int NV = 3; // Number of varying parameters
+    static constexpr int NV = 4; // Number of varying parameters
     static constexpr int ND = 0; // Number of derived parameters
     static constexpr int NF = 0; // Number of fixed parameters
     static constexpr int NI = 1; // Number of inputs
@@ -62,15 +61,15 @@ struct VFAPrepModel {
     using FixedArray   = QI_ARRAYN(ParameterType, NF); // Type for the fixed parameter array
 
     // Sequence paramter structs
-    VFAPrepSequence &seq;
+    VFAPrepSequence &sequence;
 
     // Fitting start point and bounds
     // The PD will be scaled by the fitting function to keep parameters roughly the same magnitude
-    VaryingArray const start{30., 1., 0.05};
-    VaryingArray const bounds_lo{1, 0.9, 0.01};
-    VaryingArray const bounds_hi{150, 1.1, 3};
+    VaryingArray const start{30., 1., 0.05, 1.0};
+    VaryingArray const bounds_lo{1, 0.7, 0.01, 0.5};
+    VaryingArray const bounds_hi{150, 1.5, 3, 1.5};
 
-    std::array<std::string, NV> const varying_names{"PD", "T1", "T2"};
+    std::array<std::string, NV> const varying_names{"PD", "T1", "T2", "B1"};
     std::array<std::string, NF> const fixed_names{};
     // If fixed parameters not supplied, use these default values
     FixedArray const fixed_defaults{};
@@ -78,11 +77,13 @@ struct VFAPrepModel {
     template <typename Derived>
     auto signal(Eigen::ArrayBase<Derived> const &v, FixedArray const &) const
         -> QI_ARRAY(typename Derived::Scalar) {
-        using T          = typename Derived::Scalar;
-        using Mat44      = Eigen::Matrix<T, 4, 4>;
-        T const &  PD    = v[0];
-        T const &  R1    = 1. / v[1];
-        T const &  R2    = 1. / v[2];
+        using T     = typename Derived::Scalar;
+        using Mat44 = Eigen::Matrix<T, 4, 4>;
+        T const &PD = v[0];
+        T const &R1 = 1. / v[1];
+        T const &R2 = 1. / v[2];
+        T const &B1 = v[3];
+
         auto const Relax = [&PD, &R1, &R2](double const t) {
             Mat44 R;
             R << -R2, 0, 0, 0,      //
@@ -94,8 +95,8 @@ struct VFAPrepModel {
         };
 
         auto const RF = [&](double const a, double const ph) {
-            auto const      ca = cos(a);
-            auto const      sa = sin(a);
+            auto const      ca = cos(B1 * a);
+            auto const      sa = sin(B1 * a);
             auto const      ux = cos(ph);
             auto const      uy = sin(ph);
             Eigen::Matrix4d A;
@@ -105,19 +106,19 @@ struct VFAPrepModel {
                 0., 0., 0., 1.;
             return A;
         };
-        auto const A     = RF(seq.FA, 0);
-        auto const R     = Relax(seq.TR);
+        auto const A     = RF(sequence.FA, 0);
+        auto const R     = Relax(sequence.TR);
         auto const S     = Eigen::DiagonalMatrix<double, 4, 4>({0, 0, 1., 1.}).toDenseMatrix();
         auto const RUFIS = A * S * R;
-        auto const seg2  = RUFIS.pow(seq.SPS / 2.0);
+        auto const seg2  = RUFIS.pow(sequence.SPS / 2.0);
 
-        auto const gap  = Relax(seq.TE / 4);
+        auto const gap  = Relax(sequence.TE / 4);
         auto const ref1 = RF(M_PI, M_PI / 2);
         auto const ref2 = RF(-M_PI, M_PI / 2);
-        QI_ARRAY(T) signal(seq.size());
-        for (long i = 0; i < seq.size(); i++) {
-            auto const tip_down = RF(seq.PrepFA[i], 0);
-            auto const tip_up   = RF(-seq.PrepFA[i], 0);
+        QI_ARRAY(T) signal(sequence.size());
+        for (long i = 0; i < sequence.size(); i++) {
+            auto const tip_down = RF(sequence.PrepFA[i], 0);
+            auto const tip_up   = RF(-sequence.PrepFA[i], 0);
             auto const prep     = tip_up * gap * ref2 * gap * gap * ref1 * gap * tip_down;
 
             auto const                X = seg2 * prep * seg2;
@@ -168,7 +169,7 @@ struct VFAPrepFit {
     ModelType model;
 
     // Have to tell the ModelFitFilter how many volumes we expect in each input
-    int input_size(const int) const { return model.seq.size(); }
+    int input_size(const int) const { return model.sequence.size(); }
 
     // This has to match the function signature that will be called in ModelFitFilter (which depends
     // on Blocked/Indexed. The return type is a simple struct indicating success, and on failure
@@ -199,7 +200,7 @@ struct VFAPrepFit {
         using VFADiff = ceres::
             NumericDiffCostFunction<VFAPrepCost, ceres::CENTRAL, ceres::DYNAMIC, ModelType::NV>;
         auto *vfa_prep_cost = new VFADiff(
-            new VFAPrepCost{model, fixed, data}, ceres::TAKE_OWNERSHIP, model.seq.size());
+            new VFAPrepCost{model, fixed, data}, ceres::TAKE_OWNERSHIP, model.sequence.size());
         ceres::LossFunction *loss = new ceres::HuberLoss(1.0); // Don't know if this helps
         // This is where the parameters and cost functions actually get added to Ceres
         problem.AddResidualBlock(vfa_prep_cost, loss, varying.data());
@@ -212,7 +213,7 @@ struct VFAPrepFit {
 
         ceres::Solver::Options options;
         ceres::Solver::Summary summary;
-        options.max_num_iterations  = 5;
+        options.max_num_iterations  = 30;
         options.function_tolerance  = 1e-5;
         options.gradient_tolerance  = 1e-6;
         options.parameter_tolerance = 1e-4;
@@ -254,13 +255,19 @@ int vfa_prep_main(int argc, char **argv) {
     QI::Log(verbose, "Reading sequence parameters");
     json doc = json_file ? QI::ReadJSON(json_file.Get()) : QI::ReadJSON(std::cin);
 
-    VFAPrepSequence seq(doc["VFAPrep"]);
-    VFAPrepModel    model{seq};
-    VFAPrepFit      fit{model};
-    auto fit_filter = QI::ModelFitFilter<VFAPrepFit>::New(&fit, verbose, resids, subregion.Get());
-    fit_filter->ReadInputs({input_path.Get()}, {}, mask.Get());
-    fit_filter->Update();
-    fit_filter->WriteOutputs(prefix.Get() + "VFAPrep_");
+    VFAPrepSequence sequence(doc["VFAPrep"]);
+    VFAPrepModel    model{sequence};
+    if (simulate) {
+        QI::SimulateModel<VFAPrepModel, false>(
+            doc, model, {}, {input_path.Get()}, verbose, simulate.Get());
+    } else {
+        VFAPrepFit fit{model};
+        auto       fit_filter =
+            QI::ModelFitFilter<VFAPrepFit>::New(&fit, verbose, resids, subregion.Get());
+        fit_filter->ReadInputs({input_path.Get()}, {}, mask.Get());
+        fit_filter->Update();
+        fit_filter->WriteOutputs(prefix.Get() + "VFAPrep_");
+    }
     QI::Log(verbose, "Finished.");
     return EXIT_SUCCESS;
 }
