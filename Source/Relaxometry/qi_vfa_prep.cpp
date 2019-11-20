@@ -26,32 +26,40 @@
 #include "Util.h"
 
 struct VFAPrepSequence : QI::SequenceBase {
-    double         TR;
-    int            SPS;
-    Eigen::ArrayXd FA, PrepFA, TE;
+    bool             adiabatic;
+    double           TR;
+    int              SPS;
+    std::vector<int> n180;
+    Eigen::ArrayXd   FA, PrepFA, TE;
     QI_SEQUENCE_DECLARE(VFAPrep);
     Eigen::Index size() const override { return PrepFA.size(); };
 };
 void from_json(const json &j, VFAPrepSequence &s) {
+    j.at("adiabatic").get_to(s.adiabatic);
     j.at("TR").get_to(s.TR);
     j.at("SPS").get_to(s.SPS);
+    j.at("n180").get_to(s.n180);
     s.FA     = QI::ArrayFromJSON(j, "FA", M_PI / 180.0);
     s.PrepFA = QI::ArrayFromJSON(j, "PrepFA", M_PI / 180.0);
     s.TE     = QI::ArrayFromJSON(j, "TE");
-    if (!((s.FA.size() == s.PrepFA.size()) && (s.FA.size() == s.TE.size()))) {
-        QI::Fail("Mismatched sizes in VFAPrep. FA={}, PrepFA={}, TE={}",
+    if (!((s.FA.size() == s.PrepFA.size()) && (s.FA.size() == s.TE.size()) &&
+          (s.FA.size() == static_cast<long>(s.n180.size())))) {
+        QI::Fail("Mismatched sizes in VFAPrep. FA={}, PrepFA={}, TE={}, n180={}",
                  s.FA.size(),
                  s.PrepFA.size(),
-                 s.TE.size());
+                 s.TE.size(),
+                 s.n180.size());
     }
 }
 
 void to_json(json &j, const VFAPrepSequence &s) {
-    j = json{{"TR", s.TR},
+    j = json{{"adiabatic", s.adiabatic},
+             {"TR", s.TR},
              {"SPS", s.SPS},
              {"FA", s.FA * 180 / M_PI},
              {"PrepFA", s.PrepFA * 180 / M_PI},
-             {"TE", s.TE}};
+             {"TE", s.TE},
+             {"n180", s.n180}};
 }
 
 struct VFAPrepModel {
@@ -100,9 +108,9 @@ struct VFAPrepModel {
             return eRt;
         };
 
-        auto const RF = [&B1](double const a, double const ph) {
-            auto const      ca = cos(B1 * a);
-            auto const      sa = sin(B1 * a);
+        auto const RF = [](double const a, double const ph) {
+            auto const      ca = cos(a);
+            auto const      sa = sin(a);
             auto const      ux = cos(ph);
             auto const      uy = sin(ph);
             Eigen::Matrix4d A;
@@ -115,18 +123,27 @@ struct VFAPrepModel {
         auto const R = Relax(sequence.TR);
         auto const S = Eigen::DiagonalMatrix<double, 4, 4>({0, 0, 1., 1.}).toDenseMatrix();
 
-        auto const ref1 = RF(M_PI, M_PI / 2);
-        auto const ref2 = RF(-M_PI, M_PI / 2);
+        auto const prepB1 = sequence.adiabatic ? 1.0 : B1;
+        auto const ref1   = RF(prepB1 * M_PI, M_PI / 2);
+        auto const ref2   = RF(-prepB1 * M_PI, M_PI / 2);
         QI_ARRAY(T) signal(sequence.size());
         for (long i = 0; i < sequence.size(); i++) {
-            auto const A     = RF(sequence.FA[i], 0);
+            auto const A     = RF(B1 * sequence.FA[i], 0);
             auto const RUFIS = A * S * R;
             auto const seg2  = RUFIS.pow(sequence.SPS / 2.0);
 
-            auto const tip_down = RF(sequence.PrepFA[i], 0);
-            auto const tip_up   = RF(-sequence.PrepFA[i], 0);
-            auto const gap      = Relax(sequence.TE[i] / 4);
-            auto const prep     = tip_up * gap * ref2 * gap * gap * ref1 * gap * tip_down;
+            auto const tip_down = RF(prepB1 * sequence.PrepFA[i], 0);
+            auto const tip_up   = RF(-prepB1 * sequence.PrepFA[i], 0);
+            auto const TEdiv    = (sequence.n180[i] > 1) ? 2.0 * sequence.n180[i] : 1.0;
+            auto const gap      = Relax(sequence.TE[i] / TEdiv);
+            Mat44      prep;
+            if (sequence.n180[i] == 0) {
+                prep = tip_up * gap * tip_down;
+            } else if (sequence.n180[i] == 1) {
+                prep = tip_up * gap * ref1 * gap * tip_down;
+            } else {
+                prep = tip_up * gap * ref2 * gap * gap * ref1 * gap * tip_down;
+            }
 
             auto const                X = seg2 * prep * seg2;
             Eigen::EigenSolver<Mat44> es(X);
