@@ -27,7 +27,7 @@
 
 struct VFAPrepSequence : QI::SequenceBase {
     bool             adiabatic;
-    double           TR;
+    double           TR, ramp;
     int              SPS;
     std::vector<int> n180;
     Eigen::ArrayXd   FA, PrepFA, TE;
@@ -37,6 +37,7 @@ struct VFAPrepSequence : QI::SequenceBase {
 void from_json(const json &j, VFAPrepSequence &s) {
     j.at("adiabatic").get_to(s.adiabatic);
     j.at("TR").get_to(s.TR);
+    j.at("ramp").get_to(s.ramp);
     j.at("SPS").get_to(s.SPS);
     j.at("n180").get_to(s.n180);
     s.FA     = QI::ArrayFromJSON(j, "FA", M_PI / 180.0);
@@ -55,6 +56,7 @@ void from_json(const json &j, VFAPrepSequence &s) {
 void to_json(json &j, const VFAPrepSequence &s) {
     j = json{{"adiabatic", s.adiabatic},
              {"TR", s.TR},
+             {"ramp", s.ramp},
              {"SPS", s.SPS},
              {"FA", s.FA * 180 / M_PI},
              {"PrepFA", s.PrepFA * 180 / M_PI},
@@ -79,9 +81,9 @@ struct VFAPrepModel {
 
     // Fitting start point and bounds
     // The PD will be scaled by the fitting function to keep parameters roughly the same magnitude
-    VaryingArray const start{30., 1., 0.05, 1.0};
-    VaryingArray const bounds_lo{1, 0.5, 0.01, 0.5};
-    VaryingArray const bounds_hi{150, 3.0, 3, 1.5};
+    VaryingArray const start{35., 1., 0.12, 0.5};
+    VaryingArray const bounds_lo{10., 0.5, 0.01, 0.2};
+    VaryingArray const bounds_hi{150., 3.0, 3, 2.0};
 
     std::array<std::string, NV> const varying_names{"PD", "T1", "T2", "B1"};
     std::array<std::string, NF> const fixed_names{};
@@ -125,12 +127,16 @@ struct VFAPrepModel {
 
         auto const prepB1 = sequence.adiabatic ? 1.0 : B1;
         auto const ref1   = RF(prepB1 * M_PI, M_PI / 2);
-        auto const ref2   = RF(-prepB1 * M_PI, M_PI / 2);
+        auto const ref2   = RF(prepB1 * M_PI, -M_PI / 2);
+        auto const ramp   = Relax(sequence.ramp);
+        // QI_DB(prepB1);
+        // QI_DBMAT(ref1);
+        // QI_DBMAT(ref2);
         QI_ARRAY(T) signal(sequence.size());
         for (long i = 0; i < sequence.size(); i++) {
             auto const A     = RF(B1 * sequence.FA[i], 0);
             auto const RUFIS = A * S * R;
-            auto const seg2  = RUFIS.pow(sequence.SPS / 2.0);
+            auto const seg2  = RUFIS.pow(sequence.SPS / 2);
 
             auto const tip_down = RF(prepB1 * sequence.PrepFA[i], 0);
             auto const tip_up   = RF(-prepB1 * sequence.PrepFA[i], 0);
@@ -145,7 +151,7 @@ struct VFAPrepModel {
                 prep = tip_up * gap * ref2 * gap * gap * ref1 * gap * tip_down;
             }
 
-            auto const                X = seg2 * prep * seg2;
+            auto const                X = seg2 * ramp * prep * ramp * seg2;
             Eigen::EigenSolver<Mat44> es(X);
             long                      index;
             (es.eigenvalues().array().abs() - 1.0).abs().minCoeff(&index);
@@ -160,10 +166,11 @@ struct VFAPrepModel {
             // QI_DB(index);
             // QI_DBVEC(M);
         }
-        QI_DB(PD);
-        QI_DB(1 / R1);
-        QI_DB(1 / R2);
-        QI_DBVEC(signal);
+        // QI_DB(PD);
+        // QI_DB(1 / R1);
+        // QI_DB(1 / R2);
+        // QI_DB(B1);
+        // QI_DBVEC(signal);
         return signal;
     }
 };
@@ -177,6 +184,7 @@ struct VFAPrepCost {
         Eigen::Map<QI_ARRAYN(T, VFAPrepModel::NV) const> const varying(vin);
         Eigen::Map<QI_ARRAY(T)>                                residuals(rin, data.rows());
         residuals = data - model.signal(varying, fixed);
+        QI_DBVEC(varying);
         QI_DBVEC(residuals);
         return true;
     }
@@ -238,10 +246,12 @@ struct VFAPrepFit {
         ceres::Solver::Options options;
         ceres::Solver::Summary summary;
         options.max_num_iterations  = 30;
-        options.function_tolerance  = 1e-5;
-        options.gradient_tolerance  = 1e-6;
-        options.parameter_tolerance = 1e-4;
-        options.logging_type        = ceres::SILENT;
+        options.function_tolerance  = 1e-6;
+        options.gradient_tolerance  = 1e-7;
+        options.parameter_tolerance = 1e-5;
+#ifndef QI_DEBUG_BUILD
+        options.logging_type = ceres::SILENT;
+#endif
 
         varying = model.start;
         ceres::Solve(options, &problem, &summary);
@@ -254,8 +264,7 @@ struct VFAPrepFit {
         if (residuals.size() > 0) {
             residuals[0] = residual;
         }
-        varying[0] *= scale; // Multiply signals/proton density back up
-        QI_DBVEC(varying);
+        // varying[0] *= scale; // Multiply signals/proton density back up
         iterations = summary.iterations.size();
         return {true, ""};
     }
@@ -281,6 +290,9 @@ int vfa_prep_main(int argc, char **argv) {
 
     VFAPrepSequence sequence(doc["VFAPrep"]);
     VFAPrepModel    model{sequence};
+    json            tmp;
+    to_json(tmp, sequence);
+    QI::Log(verbose, "Sequence:\n{}\n", tmp.dump());
     if (simulate) {
         QI::SimulateModel<VFAPrepModel, false>(
             doc, model, {}, {input_path.Get()}, verbose, simulate.Get());

@@ -33,14 +33,14 @@ class Relax(unittest.TestCase):
         self.assertLessEqual(diff_PD.outputs.out_diff, 2)
 
     def test_vfaprep_b1(self):
-        seq = {'VFAPrep': {'TR': 0.002786, 'SPS': 128, 'adiabatic': False,
+        seq = {'VFAPrep': {'TR': 0.002786, 'SPS': 128, 'adiabatic': False, 'ramp': 0.01,
                            'FA':     [1,    6,     1,     6,     1,     6],
                            'PrepFA': [0,    0,    30,    30,    60,    60],
                            'TE':     [0.0, 0.0, 0.015, 0.015, 0.015, 0.015],
-                           'n180':   [2,    2,     2,     2,     2,     2]}}
+                           'n180':   [0,    0,     2,     2,     2,     2]}}
         sim_file = 'sim_vfa_b1.nii.gz'
         img_sz = [32, 32, 16]
-        noise = 0.01
+        noise = 0.1
 
         NewImage(img_size=img_sz, fill=100.0,
                  out_file='PD.nii.gz', verbose=vb).run()
@@ -72,7 +72,7 @@ class Relax(unittest.TestCase):
         self.assertLessEqual(diff_B1.outputs.out_diff, 1)
 
     def test_vfaprep_adiabatic(self):
-        seq = {'VFAPrep': {'TR': 0.002786, 'SPS': 128, 'adiabatic': True,
+        seq = {'VFAPrep': {'TR': 0.002786, 'SPS': 128, 'adiabatic': True, 'ramp': 0.01,
                            'FA':     [2,     2,     2,     2],
                            'PrepFA': [0,   180,    90,    90],
                            'TE':     [0, 100.0, 0.025, 0.075],
