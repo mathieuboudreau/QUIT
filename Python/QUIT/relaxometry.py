@@ -852,47 +852,46 @@ class PLANETSim(QI.SimCommand):
 ############################ vfa-prep ############################
 
 
-class VFAPrepInputSpec(QI.FitInputSpec):
+class MUPAInputSpec(QI.FitInputSpec):
     # Inputs - none
 
     # Options - none. Yet
     pass
 
 
-class VFAPrepOutputSpec(TraitedSpec):
-    pd_map = File('VFAPrep_PD.nii.gz', desc="Path to PD map", usedefault=True)
-    t1_map = File('VFAPrep_T1.nii.gz', desc="Path to T1 map", usedefault=True)
-    t2_map = File('VFAPrep_T2.nii.gz', desc="Path to T2 map", usedefault=True)
-    b1_map = File('VFAPrep_B1.nii.gz', desc="Path to B1 map", usedefault=True)
-    rmse_map = File('VFAPrep_rmse.nii.gz',
+class MUPAOutputSpec(TraitedSpec):
+    pd_map = File('MUPA_PD.nii.gz', desc="Path to PD map", usedefault=True)
+    t1_map = File('MUPA_T1.nii.gz', desc="Path to T1 map", usedefault=True)
+    t2_map = File('MUPA_T2.nii.gz', desc="Path to T2 map", usedefault=True)
+    rmse_map = File('MUPA_rmse.nii.gz',
                     desc="Path to residual map", usedefault=True)
 
 
-class VFAPrep(QI.FitCommand):
+class MUPA(QI.FitCommand):
     """
     Run VFA-Prep Analysis
 
     """
 
-    _cmd = 'qi vfa-prep'
-    input_spec = VFAPrepInputSpec
-    output_spec = VFAPrepOutputSpec
+    _cmd = 'qi mupa'
+    input_spec = MUPAInputSpec
+    output_spec = MUPAOutputSpec
 
 
-class VFAPrepSimInputSpec(QI.SimInputSpec):
+class MUPASimInputSpec(QI.SimInputSpec):
     # Inputs
 
     # Options
     pass
 
 
-class VFAPrepSim(QI.SimCommand):
+class MUPASim(QI.SimCommand):
     """
-    Run DESPOT2-FM simulation
+    Run MUPA simulation
 
     """
 
-    _cmd = 'qi vfa-prep'
-    _param_files = ['PD', 'T1', 'T2', 'B1']
-    input_spec = VFAPrepSimInputSpec
+    _cmd = 'qi mupa'
+    _param_files = ['PD', 'T1', 'T2']
+    input_spec = MUPASimInputSpec
     output_spec = QI.SimOutputSpec
