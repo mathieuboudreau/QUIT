@@ -33,14 +33,14 @@ class Relax(unittest.TestCase):
         self.assertLessEqual(diff_PD.outputs.out_diff, 2)
 
     def test_MUPA(self):
-        seq = {'MUPA': {'TR': 0.002786, 'SPS': 128, 'FA': 2,
-                        'prep_type':     ['inversion',    'delay',     'delay',     't2-prep'],
-                        'prep_time': [0, 0, 0, 80]}}
+        seq = {'MUPA': {'TR': 0.002786, 'SPS': 64, 'FA': 2,
+                        'prep_type': ['inversion',    'delay',     'delay', 'delay',     't2-prep', 't2-prep'],
+                        'prep_time': [0, 0.1, 0.1, 0.1, 0.04, 0.04]}}
         sim_file = 'sim_mupa.nii.gz'
-        img_sz = [32, 32, 32]
+        img_sz = [8, 8, 8]
         noise = 0.01
 
-        NewImage(img_size=img_sz, grad_dim=0, grad_vals=(0.5, 1.5),
+        NewImage(img_size=img_sz, grad_dim=0, grad_vals=(50, 150),
                  out_file='PD.nii.gz', verbose=vb).run()
         NewImage(img_size=img_sz, grad_dim=1, grad_vals=(0.8, 1.5),
                  out_file='T1.nii.gz', verbose=vb).run()

@@ -66,9 +66,9 @@ struct MUPAModel {
 
     // Fitting start point and bounds
     // The PD will be scaled by the fitting function to keep parameters roughly the same magnitude
-    VaryingArray const start{30., 1., 0.05};
+    VaryingArray const start{30., 1., 0.1};
     VaryingArray const bounds_lo{1, 0.5, 0.01};
-    VaryingArray const bounds_hi{150, 3.0, 3};
+    VaryingArray const bounds_hi{150, 3.0, 3.0};
 
     std::array<std::string, NV> const varying_names{"PD", "T1", "T2"};
     std::array<std::string, NF> const fixed_names{};
@@ -96,10 +96,12 @@ struct MUPAModel {
         };
 
         auto const RF = [](double const a, double const ph) {
-            auto const      ca = cos(a);
-            auto const      sa = sin(a);
-            auto const      ux = cos(ph);
-            auto const      uy = sin(ph);
+            auto const ca = cos(a);
+            auto const sa = sin(a);
+            // I got the definition of the rotation matrix around the wrong axis,
+            // so rotate the axis
+            auto const      ux = cos(ph - M_PI_2);
+            auto const      uy = sin(ph - M_PI_2);
             Eigen::Matrix4d A;
             A << ca + ux * ux * (1 - ca), ux * uy * (1 - ca), -uy * sa, 0., //
                 ux * uy * (1 - ca), ca + uy * uy * (1 - ca), ux * sa, 0.,   //
@@ -111,7 +113,7 @@ struct MUPAModel {
         auto const A     = RF(sequence.FA, 0);
         auto const R     = Relax(sequence.TR);
         auto const S     = Eigen::DiagonalMatrix<double, 4, 4>({0, 0, 1., 1.}).toDenseMatrix();
-        auto const RUFIS = A * S * R;
+        auto const RUFIS = S * R * A;
         auto const seg2  = RUFIS.pow(sequence.SPS / 2.0);
         auto const seg   = seg2 * seg2;
         // First calculate the system matrix
@@ -122,14 +124,23 @@ struct MUPAModel {
                 auto const I  = RF(M_PI, 0);
                 auto const TI = Relax(tprep);
                 X             = S * TI * I * X;
+                QI_DBMAT(I);
+                QI_DBMAT(TI);
+                QI_DBMAT(X);
             } else if (sequence.prep_type[is] == "t2-prep") {
-                auto const TD = RF(M_PI / 2, 0);
+                auto const TD = RF(M_PI_2, 0);
                 auto const TE = Relax(tprep);
-                auto const TU = RF(-M_PI / 2, 0);
+                auto const TU = RF(-M_PI_2, 0);
                 X             = S * TU * TE * TD * X;
+                QI_DBMAT(TD);
+                QI_DBMAT(TE);
+                QI_DBMAT(TU);
+                QI_DBMAT(X);
             } else if (sequence.prep_type[is] == "delay") {
                 auto const D = Relax(tprep);
                 X            = D * X;
+                QI_DBMAT(D);
+                QI_DBMAT(X);
             }
             X = seg * X;
         }
@@ -140,7 +151,7 @@ struct MUPAModel {
         Eigen::Vector3d m_ss  = Xr.partialPivLu().solve(b);
         Eigen::Vector4d m_aug = Eigen::Vector4d::Ones();
         m_aug.head(3)         = m_ss;
-
+        QI_DBVEC(m_ss);
         // Now loop through the segments and record the signal for each
         Eigen::ArrayXd sig(sequence.size());
         for (int is = 0; is < sequence.size(); is++) {
@@ -158,8 +169,10 @@ struct MUPAModel {
                 auto const D = Relax(tprep);
                 m_aug        = D * m_aug;
             }
-            m_aug   = seg2 * m_aug;
-            sig[is] = sqrt(m_aug[0] * m_aug[0] + m_aug[1] * m_aug[1]);
+            m_aug            = seg2 * m_aug;
+            auto const m_sig = A * m_aug;
+            sig[is]          = m_sig[0]; // Real part
+            m_aug            = seg2 * m_aug;
         }
         QI_DB(PD);
         QI_DB(1 / R1);
