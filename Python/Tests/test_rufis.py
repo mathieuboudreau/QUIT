@@ -83,6 +83,19 @@ class RUFIS(unittest.TestCase):
         }
         self.run_MUPA(seq)
 
+    def test_MUPA2A(self):
+        seq = {
+            'MUPA': {
+                'TR': 2e-3,
+                'Tramp': 10e-3,
+                'FA': [2, 2, 2, 2, 6, 2, 2],
+                'Trf': [24, 24, 24, 24, 24, 24, 24],
+                'SPS': [384, 384, 384, 96, 384, 384, 384],
+                'prep': ['inv', 'null', 'null', 't2-80', 'null', 'null', 'null'],
+                'prep_pulses': pp}
+        }
+        self.run_MUPA(seq)
+
     def test_MUPA3(self):
         seq = {
             'MUPA': {
