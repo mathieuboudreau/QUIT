@@ -27,7 +27,7 @@ jobs:
           pip install -e ./Python/
         shell: bash
       - name: Run Tests
-        run: export PATH="$PWD/../../build/source:$PATH"; echo $PATH; python -m unittest discover
+        run: export PATH="$PWD/../../build/Source:$PATH"; echo $PATH; python -m unittest discover
         working-directory: ./Python/Tests
         shell: bash
       - name: GZip Release
@@ -52,5 +52,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./qi-${{ matrix.os }}.gz
-          asset_name: QUIT for ${{ matrix.os }}
+          asset_name: qi-${{ matrix.os }}.gz
           asset_content_type: application/gzip
