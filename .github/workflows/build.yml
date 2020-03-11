@@ -1,19 +1,8 @@
-name: Greet Everyone
+name: Build & Release
 # This workflow is triggered on pushes to the repository.
 on: [push]
 
 jobs:
-  prep:
-    steps:
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: true
   build:
     name: Build
     runs-on: ${{ matrix.os }}
@@ -43,6 +32,15 @@ jobs:
       - name: Zip Release
         run: zip ./build/qi ./build/qi-${{ matrix.os }}.zip
         shell: bash
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: true
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
