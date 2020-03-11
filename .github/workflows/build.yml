@@ -3,11 +3,22 @@ name: Greet Everyone
 on: [push]
 
 jobs:
-  build_linux:
-    # Job name is Greeting
-    name: Build on Linux
-    # This job runs on Linux
-    runs-on: ubuntu-latest
+  prep:
+  - name: Create Release
+    id: create_release
+    uses: actions/create-release@latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      tag_name: ${{ github.ref }}
+      release_name: Release ${{ github.ref }}
+      draft: true
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v1
         with:
@@ -15,13 +26,29 @@ jobs:
       - name: Build Binary
         run: ./build.sh
         shell: bash
-  build_macosx:
-    name: Build Mac OS X
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v1
+      - name: Set up Python
+        uses: actions/setup-python@v1
         with:
-          submodules: true
-      - name: Build Binary
-        run: ./build.sh
+          python-version: 3.7
+      - name: Install nipype
+        run: |
+          python -m pip install --upgrade pip
+          pip install nipype pytest
         shell: bash
+      - name: Run Tests
+        run: python -m unittest discover
+        working-directory: ./Python/Tests
+        shell: bash
+      - name: Zip Release
+        run: zip ./build/qi ./build/qi-${{ matrix.os }}.zip
+        shell: bash
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/qi-${{ matrix.os }}.zip
+          asset_name: QUIT for ${{ matrix.os }}
+          asset_content_type: application/zip
