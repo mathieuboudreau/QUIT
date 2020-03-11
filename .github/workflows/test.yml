@@ -1,8 +1,6 @@
 name: Build & Test
 # This workflow is triggered on pushes to the repository.
-on:
-  push:
-    tags-ignore: v*
+on: push
 
 jobs:
   build:
