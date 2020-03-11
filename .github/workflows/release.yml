@@ -1,6 +1,8 @@
 name: Build & Release
 # This workflow is triggered on pushes to the repository.
-on: [push]
+on:
+  push:
+    tags: v*
 
 jobs:
   build:
@@ -8,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-16.04, macos-10.15]
     steps:
       - uses: actions/checkout@v1
         with:
