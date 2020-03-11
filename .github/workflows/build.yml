@@ -1,4 +1,4 @@
-name: Build & Test
+name: Build
 # This workflow is triggered on pushes to the repository.
 on: push
 
@@ -10,14 +10,14 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     steps:
-      - uses: actions/checkout@latest
+      - uses: actions/checkout@v1
         with:
           submodules: true
       - name: Build Binary
         run: ./build.sh -j 8
         shell: bash
       - name: Set up Python
-        uses: actions/setup-python@latest
+        uses: actions/setup-python@v1
         with:
           python-version: 3.7
       - name: Prepare Python
