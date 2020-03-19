@@ -255,7 +255,8 @@ int despot2_main(int argc, char **argv) {
                                           {QI::CheckPos(t1_path), B1.Get()},
                                           {QI::CheckPos(ssfp_path)},
                                           verbose,
-                                          simulate.Get());
+                                          simulate.Get(),
+                                          subregion.Get());
     } else {
         DESPOT2Fit *d2 = nullptr;
         switch (algorithm.Get()) {

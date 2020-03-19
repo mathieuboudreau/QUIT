@@ -25,7 +25,7 @@ void SimulateModel(json &                                    json,
                    std::array<std::string, Model::NI> const &outpaths,
                    bool const                                verbose,
                    double const                              noise,
-                   std::string const &                       subRegion = "") {
+                   std::string const &                       subRegion) {
     auto simulator = QI::ModelSimFilter<Model, MultiOutput>::New(model, verbose, subRegion);
     simulator->SetNoise(noise);
     for (auto i = 0; i < Model::NV; i++) {

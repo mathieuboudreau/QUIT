@@ -163,7 +163,8 @@ int qmt_main(int argc, char **argv) {
                                               {f0.Get(), B1.Get(), T1.Get()},
                                               {mtsat_path.Get()},
                                               verbose,
-                                              simulate.Get());
+                                              simulate.Get(),
+                                              subregion.Get());
     } else {
         RamaniFitFunction fit{model};
 

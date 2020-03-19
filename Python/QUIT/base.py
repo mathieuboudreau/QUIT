@@ -89,6 +89,12 @@ class SimInputBaseSpec(DynamicTraitedSpec):
     json = traits.File(exists=True, desc='JSON Input file', argstr='--json=%s')
     noise = traits.Float(desc='Noise level to add to simulation',
                          argstr='--simulate=%f', default_value=0.0, usedefault=True)
+    subregion = traits.String(
+        desc='Only process a subregion of the image. Argument should be a string "start_x,start_y,start_z,size_x,size_y,size_z"', argstr='--subregion=%s')
+    threads = traits.Int(
+        desc='Use N threads (default=4, 0=hardware limit)', argstr='--threads=%d')
+    mask_file = File(
+        desc='Only process voxels within the mask', argstr='--mask=%s')
 
 
 class SimInputSpec(SimInputBaseSpec):

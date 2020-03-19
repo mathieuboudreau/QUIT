@@ -53,7 +53,7 @@ int rufis_mt_main(int argc, char **argv) {
                        typename decltype(model)::FixedNames const fixed) {
         if (simulate) {
             QI::SimulateModel<decltype(model), false>(
-                doc, model, fixed, {input_path.Get()}, verbose, simulate.Get());
+                doc, model, fixed, {input_path.Get()}, verbose, simulate.Get(), subregion.Get());
         } else {
             using FitType = QI::ScaledNumericDiffFit<decltype(model), 2>;
             FitType fit(model);

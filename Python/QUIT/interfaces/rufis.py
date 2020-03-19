@@ -22,11 +22,10 @@ class MUPAInputSpec(QI.FitInputSpec):
 
 
 class MUPAOutputSpec(TraitedSpec):
-    pd_map = File('MUPAB1_M0.nii.gz', desc="Path to M0 map", usedefault=True)
-    t1_map = File('MUPAB1_T1.nii.gz', desc="Path to T1 map", usedefault=True)
-    t2_map = File('MUPAB1_T2.nii.gz', desc="Path to T2 map", usedefault=True)
-    b1_map = File('MUPAB1_B1.nii.gz', desc="Path to B1 map", usedefault=True)
-    rmse_map = File('MUPAB1_rmse.nii.gz',
+    pd_map = File('MUPA_M0.nii.gz', desc="Path to M0 map", usedefault=True)
+    t1_map = File('MUPA_T1.nii.gz', desc="Path to T1 map", usedefault=True)
+    t2_map = File('MUPA_T2.nii.gz', desc="Path to T2 map", usedefault=True)
+    rmse_map = File('MUPA_rmse.nii.gz',
                     desc="Path to residual map", usedefault=True)
 
 
@@ -53,15 +52,55 @@ class MUPASim(QI.SimCommand):
     """
 
     _cmd = 'qi mupa'
+    _param_files = ['M0', 'T1', 'T2']
+    input_spec = MUPASimInputSpec
+    output_spec = QI.SimOutputSpec
+
+############################ MUPA-B1 ############################
+
+
+class MUPAB1InputSpec(QI.FitInputSpec):
+    # Inputs - none
+
+    # Options - none. Yet
+    pass
+
+
+class MUPAB1OutputSpec(TraitedSpec):
+    pd_map = File('MUPAB1_M0.nii.gz', desc="Path to M0 map", usedefault=True)
+    t1_map = File('MUPAB1_T1.nii.gz', desc="Path to T1 map", usedefault=True)
+    t2_map = File('MUPAB1_T2.nii.gz', desc="Path to T2 map", usedefault=True)
+    b1_map = File('MUPAB1_B1.nii.gz', desc="Path to B1 map", usedefault=True)
+    rmse_map = File('MUPAB1_rmse.nii.gz',
+                    desc="Path to residual map", usedefault=True)
+
+
+class MUPAB1(QI.FitCommand):
+    """
+    Run MUPA Analysis
+
+    """
+
+    _cmd = 'qi mupa --B1'
+    input_spec = MUPAInputSpec
+    output_spec = MUPAOutputSpec
+
+
+class MUPAB1SimInputSpec(QI.SimInputSpec):
+    # Options
+    pass
+
+
+class MUPAB1Sim(QI.SimCommand):
+    """
+    Run MUPA simulation
+
+    """
+
+    _cmd = 'qi mupa'
     _param_files = ['M0', 'T1', 'T2', 'B1']
-
-
-<< << << < HEAD
-input_spec = QI.SimInputSpec
-== == == =
-input_spec = MUPASimInputSpec
->>>>>> > 921ad03... ENH Allow variable segment length in MUPA
-output_spec = QI.SimOutputSpec
+    input_spec = MUPASimInputSpec
+    output_spec = QI.SimOutputSpec
 
 ############################ MUPA-MT ############################
 

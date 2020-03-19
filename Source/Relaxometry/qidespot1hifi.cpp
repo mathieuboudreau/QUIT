@@ -207,7 +207,8 @@ int despot1hifi_main(int argc, char **argv) {
                                            {},
                                            {QI::CheckPos(spgr_path), QI::CheckPos(mprage_path)},
                                            verbose,
-                                           simulate.Get());
+                                           simulate.Get(),
+                                           subregion.Get());
     } else {
         HIFIFit hifi_fit{model};
         auto    fit_filter =

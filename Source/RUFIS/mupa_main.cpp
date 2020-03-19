@@ -21,6 +21,7 @@
 #include "SimulateModel.h"
 #include "Util.h"
 
+#include "mupa_model.h"
 #include "mupa_model_b1.h"
 #include "mupa_model_mt.h"
 
@@ -36,7 +37,7 @@ int mupa_main(int argc, char **argv) {
 
     QI_COMMON_ARGS;
 
-    args::ValueFlag<std::string> B1(parser, "B1", "Fix B1", {"B1"});
+    args::Flag                   B1(parser, "B1", "Fit for B1", {"B1"});
     args::Flag                   mt(parser, "MT", "Use MT model", {"mt"});
     args::ValueFlag<double>      T2_b(parser, "T2_b", "T2 of bound pool", {"T2b"}, 12e-6);
     args::ValueFlag<std::string> ls_arg(
@@ -56,7 +57,7 @@ int mupa_main(int argc, char **argv) {
                        typename decltype(model)::FixedNames const fixed) {
         if (simulate) {
             QI::SimulateModel<decltype(model), false>(
-                doc, model, fixed, {input_path.Get()}, verbose, simulate.Get());
+                doc, model, fixed, {input_path.Get()}, verbose, simulate.Get(), subregion.Get());
         } else {
             QI::Log(verbose, "NS {}", decltype(model)::NS);
             using FitType = QI::ScaledNumericDiffFit<decltype(model), decltype(model)::NS>;
@@ -72,9 +73,12 @@ int mupa_main(int argc, char **argv) {
     if (mt) {
         MUPAMTModel model{{}, sequence};
         process(model, "MUPAMT_", {});
-    } else {
+    } else if (B1) {
         MUPAB1Model model{{}, sequence};
         process(model, "MUPAB1_", {});
+    } else {
+        MUPAModel model{{}, sequence};
+        process(model, "MUPA_", {});
     }
     QI::Log(verbose, "Finished.");
     return EXIT_SUCCESS;

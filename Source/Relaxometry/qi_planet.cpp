@@ -121,7 +121,8 @@ int planet_main(int argc, char **argv) {
                                              {B1.Get()},
                                              {G_path.Get(), a_path.Get(), b_path.Get()},
                                              verbose,
-                                             simulate.Get());
+                                             simulate.Get(),
+                                             subregion.Get());
     } else {
         PLANETFit fit{model};
         auto      fit_filter =
