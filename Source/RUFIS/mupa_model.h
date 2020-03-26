@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Model.h"
-#include "mupa_sequence.h"
+#include "rufis_sequence.h"
 
 struct MUPAModel : QI::Model<double, double, 3, 0> {
     static int const   NS = 1;
-    MUPASequence &     sequence;
+    RUFISSequence &    sequence;
     VaryingArray const start{30., 1., 0.1};
     VaryingArray const lo{1, 0.01, 0.01};
     VaryingArray const hi{150, 5.0, 5.0};

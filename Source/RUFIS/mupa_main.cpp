@@ -28,7 +28,7 @@
 /*
  * Main
  */
-int mupa_main(int argc, char **argv) {
+int rufis_mupa_main(int argc, char **argv) {
     Eigen::initParallel();
     args::ArgumentParser parser("Calculates parametric maps from MUPA data "
                                 "data.\nhttp://github.com/spinicist/QUIT");
@@ -37,7 +37,6 @@ int mupa_main(int argc, char **argv) {
 
     QI_COMMON_ARGS;
 
-    args::Flag                   B1(parser, "B1", "Fit for B1", {"B1"});
     args::Flag                   mt(parser, "MT", "Use MT model", {"mt"});
     args::ValueFlag<double>      T2_b(parser, "T2_b", "T2 of bound pool", {"T2b"}, 12e-6);
     args::ValueFlag<std::string> ls_arg(
@@ -50,7 +49,7 @@ int mupa_main(int argc, char **argv) {
     QI::Log(verbose, "Reading sequence parameters");
     json doc = json_file ? QI::ReadJSON(json_file.Get()) : QI::ReadJSON(std::cin);
 
-    MUPASequence sequence(doc["MUPA"]);
+    RUFISSequence sequence(doc["MUPA"]);
 
     auto process = [&](auto                                       model,
                        const std::string &                        model_name,
@@ -73,12 +72,9 @@ int mupa_main(int argc, char **argv) {
     if (mt) {
         MUPAMTModel model{{}, sequence};
         process(model, "MUPAMT_", {});
-    } else if (B1) {
+    } else {
         MUPAB1Model model{{}, sequence};
         process(model, "MUPAB1_", {});
-    } else {
-        MUPAModel model{{}, sequence};
-        process(model, "MUPA_", {});
     }
     QI::Log(verbose, "Finished.");
     return EXIT_SUCCESS;

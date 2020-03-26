@@ -21,12 +21,12 @@
 #include "SimulateModel.h"
 #include "Util.h"
 
-#include "mt_model.h"
+#include "ss_model.h"
 
 /*
  * Main
  */
-int rufis_mt_main(int argc, char **argv) {
+int rufis_ss_main(int argc, char **argv) {
     Eigen::initParallel();
     args::ArgumentParser parser("Calculates parametric maps from MUPA data "
                                 "data.\nhttp://github.com/spinicist/QUIT");
@@ -47,15 +47,15 @@ int rufis_mt_main(int argc, char **argv) {
     QI::Log(verbose, "Reading sequence parameters");
     json doc = json_file ? QI::ReadJSON(json_file.Get()) : QI::ReadJSON(std::cin);
 
-    MTSequence sequence(doc["MT"]);
-    auto       process = [&](auto                                       model,
+    RUFISSequence sequence(doc["RUFIS"]);
+    auto          process = [&](auto                                       model,
                        const std::string &                        model_name,
                        typename decltype(model)::FixedNames const fixed) {
         if (simulate) {
             QI::SimulateModel<decltype(model), false>(
                 doc, model, fixed, {input_path.Get()}, verbose, simulate.Get(), subregion.Get());
         } else {
-            using FitType = QI::ScaledNumericDiffFit<decltype(model), 2>;
+            using FitType = QI::ScaledNumericDiffFit<decltype(model), 1>;
             FitType fit(model);
 
             auto fit_filter =
@@ -66,10 +66,11 @@ int rufis_mt_main(int argc, char **argv) {
         }
     };
 
-    QI::Log(verbose, "Reading lineshape file: {}", ls_arg.Get());
-    json    ls_file = QI::ReadJSON(ls_arg.Get());
-    MTModel model{{}, sequence, ls_file.at("lineshape").get<QI::InterpLineshape>()};
-    process(model, "MT_", {});
+    // QI::Log(verbose, "Reading lineshape file: {}", ls_arg.Get());
+    // json    ls_file = QI::ReadJSON(ls_arg.Get());
+
+    SSModel model{{}, sequence}; //, ls_file.at("lineshape").get<QI::InterpLineshape>()};
+    process(model, "RUFIS_SS_", {});
 
     QI::Log(verbose, "Finished.");
     return EXIT_SUCCESS;

@@ -105,12 +105,12 @@ class MUPAB1Sim(QI.SimCommand):
 ############################ MUPA-MT ############################
 
 
-class MUPAMTInputSpec(QI.FitInputSpec):
+class MUPASteadyStateInputSpec(QI.FitInputSpec):
     # Inputs - none
     pass
 
 
-class MUPAMTOutputSpec(TraitedSpec):
+class MUPASteadyStateOutputSpec(TraitedSpec):
     M0_f_map = File('MUPAMT_M0_f.nii.gz',
                     desc='Path to free pool M0 map', usedefault=True)
     M0_b_map = File('MUPAMT_M0_b.nii.gz',
@@ -134,8 +134,8 @@ class MUPAMT(QI.FitCommand):
     """
 
     _cmd = 'qi mupa --mt'
-    input_spec = MUPAMTInputSpec
-    output_spec = MUPAMTOutputSpec
+    input_spec = MUPASteadyStateInputSpec
+    output_spec = MUPASteadyStateOutputSpec
 
 
 class MUPAMTSimInputSpec(QI.SimInputSpec):
@@ -155,60 +155,48 @@ class MUPAMTSim(QI.SimCommand):
     output_spec = QI.SimOutputSpec
 
 
-############################ MT ############################
+############################ Steady-State ############################
 
 
-class MTInputSpec(QI.FitInputSpec):
+class SteadyStateInputSpec(QI.FitInputSpec):
     # Inputs - none
+    pass
 
-    lineshape = File(desc='Path to linshape file', argstr='--lineshape=%s')
 
-
-class MTOutputSpec(TraitedSpec):
-    M0_f_map = File('MT_M0_f.nii.gz',
-                    desc='Path to free pool M0 map', usedefault=True)
-    M0_b_map = File('MT_M0_b.nii.gz',
-                    desc='Path to bound pool M0 map', usedefault=True)
-    t1_f_map = File('MT_T1_f.nii.gz',
-                    desc='Path to T1 map', usedefault=True)
-    t2_f_map = File('MT_T2_f.nii.gz',
-                    desc='Path to T2 map', usedefault=True)
-    t2_b_map = File('MT_T2_b.nii.gz',
-                    desc='Path to bound pool T2 map', usedefault=True)
-    k_map = File('MT_k.nii.gz', desc='Path to exchange rate map',
-                 usedefault=True)
-    f_b_map = File('MT_f_b.nii.gz',
-                   desc='Path to f_b map', usedefault=True)
-    b1_map = File('MT_B1.nii.gz',
+class SteadyStateOutputSpec(TraitedSpec):
+    M0_map = File('RUFIS_SS_M0.nii.gz',
+                  desc='Path to M0 map', usedefault=True)
+    T1_map = File('RUFIS_SS_T1.nii.gz',
+                  desc='Path to T1 map', usedefault=True)
+    B1_map = File('RUFIS_SS_B1.nii.gz',
                   desc='Path to B1 map', usedefault=True)
-    rmse_map = File('MT_rmse.nii.gz',
+    rmse_map = File('RUFIS_SS_rmse.nii.gz',
                     desc="Path to residual map", usedefault=True)
 
 
-class MT(QI.FitCommand):
+class SteadyState(QI.FitCommand):
     """
     Run  MT Analysis
 
     """
 
-    _cmd = 'qi rufis-mt'
-    input_spec = MTInputSpec
-    output_spec = MTOutputSpec
+    _cmd = 'qi rufis-ss'
+    input_spec = SteadyStateInputSpec
+    output_spec = SteadyStateOutputSpec
 
 
-class MTSimInputSpec(QI.SimInputSpec):
+class SteadyStateSimInputSpec(QI.SimInputSpec):
     # Inputs
+    pass
 
-    lineshape = File(desc='Path to linshape file', argstr='--lineshape=%s')
 
-
-class MTSim(QI.SimCommand):
+class SteadyStateSim(QI.SimCommand):
     """
     Run  simulation
 
     """
 
-    _cmd = 'qi rufis-mt'
-    _param_files = ['M0_f', 'T1_f', 'T2_f', 'M0_b', 'T2_b', 'k', 'B1']
-    input_spec = MTSimInputSpec
+    _cmd = 'qi rufis-ss'
+    _param_files = ['M0', 'T1', 'B1']
+    input_spec = SteadyStateSimInputSpec
     output_spec = QI.SimOutputSpec
