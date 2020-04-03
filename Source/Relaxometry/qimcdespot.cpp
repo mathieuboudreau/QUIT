@@ -166,6 +166,7 @@ int mcdespot_main(int argc, char **argv) {
                                                      model,
                                                      {f0.Get(), B1.Get()},
                                                      {spgr_path.Get(), ssfp_path.Get()},
+                                                     mask.Get(),
                                                      verbose,
                                                      simulate.Get(),
                                                      subregion.Get());

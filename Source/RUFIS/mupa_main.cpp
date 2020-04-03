@@ -55,8 +55,14 @@ int rufis_mupa_main(int argc, char **argv) {
                        const std::string &                        model_name,
                        typename decltype(model)::FixedNames const fixed) {
         if (simulate) {
-            QI::SimulateModel<decltype(model), false>(
-                doc, model, fixed, {input_path.Get()}, verbose, simulate.Get(), subregion.Get());
+            QI::SimulateModel<decltype(model), false>(doc,
+                                                      model,
+                                                      fixed,
+                                                      {input_path.Get()},
+                                                      mask.Get(),
+                                                      verbose,
+                                                      simulate.Get(),
+                                                      subregion.Get());
         } else {
             QI::Log(verbose, "NS {}", decltype(model)::NS);
             using FitType = QI::ScaledNumericDiffFit<decltype(model), decltype(model)::NS>;

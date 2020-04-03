@@ -162,6 +162,7 @@ int qmt_main(int argc, char **argv) {
                                               model,
                                               {f0.Get(), B1.Get(), T1.Get()},
                                               {mtsat_path.Get()},
+                                              mask.Get(),
                                               verbose,
                                               simulate.Get(),
                                               subregion.Get());

@@ -7,7 +7,7 @@ Requires that the QUIT tools are in your your system path
 """
 
 from os import path, getcwd
-from nipype.interfaces.base import TraitedSpec, File, traits
+from nipype.interfaces.base import TraitedSpec, DynamicTraitedSpec, File, traits
 from .. import base as QI
 
 
@@ -159,35 +159,34 @@ class MUPAMTSim(QI.SimCommand):
 
 
 class SteadyStateInputSpec(QI.FitInputSpec):
-    # Inputs - none
+    fitT2 = traits.Bool(desc='Fit T2 model', argstr='--T2')
+
+
+class SteadyStateOutputSpec(DynamicTraitedSpec):
     pass
-
-
-class SteadyStateOutputSpec(TraitedSpec):
-    M0_map = File('RUFIS_SS_M0.nii.gz',
-                  desc='Path to M0 map', usedefault=True)
-    T1_map = File('RUFIS_SS_T1.nii.gz',
-                  desc='Path to T1 map', usedefault=True)
-    B1_map = File('RUFIS_SS_B1.nii.gz',
-                  desc='Path to B1 map', usedefault=True)
-    rmse_map = File('RUFIS_SS_rmse.nii.gz',
-                    desc="Path to residual map", usedefault=True)
 
 
 class SteadyState(QI.FitCommand):
     """
-    Run  MT Analysis
+    Run  Steady-State Analysis
 
     """
 
     _cmd = 'qi rufis-ss'
+    _prefix = 'SS'
     input_spec = SteadyStateInputSpec
     output_spec = SteadyStateOutputSpec
 
+    def __init__(self, **kwargs):
+        if 'fitT2' in kwargs and kwargs['fitT2']:
+            self._param_files = ['M0', 'T1', 'T2', 'B1']
+        else:
+            self._param_files = ['M0', 'T1', 'B1']
+        super(SteadyState, self).__init__(**kwargs)
+
 
 class SteadyStateSimInputSpec(QI.SimInputSpec):
-    # Inputs
-    pass
+    fitT2 = traits.Bool(desc='Fit T2 model', argstr='--T2')
 
 
 class SteadyStateSim(QI.SimCommand):
@@ -197,6 +196,12 @@ class SteadyStateSim(QI.SimCommand):
     """
 
     _cmd = 'qi rufis-ss'
-    _param_files = ['M0', 'T1', 'B1']
     input_spec = SteadyStateSimInputSpec
     output_spec = QI.SimOutputSpec
+
+    def __init__(self, **kwargs):
+        if 'fitT2' in kwargs and kwargs['fitT2']:
+            self._param_files = ['M0', 'T1', 'T2', 'B1']
+        else:
+            self._param_files = ['M0', 'T1', 'B1']
+        super(SteadyStateSim, self).__init__(**kwargs)

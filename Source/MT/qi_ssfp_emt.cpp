@@ -214,6 +214,7 @@ int ssfp_emt_main(int argc, char **argv) {
                                           model,
                                           {B1.Get(), T2_f.Get()},
                                           {G_path.Get(), a_path.Get(), b_path.Get()},
+                                          mask.Get(),
                                           verbose,
                                           simulate.Get(),
                                           subregion.Get());

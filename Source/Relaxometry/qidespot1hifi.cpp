@@ -206,6 +206,7 @@ int despot1hifi_main(int argc, char **argv) {
                                            model,
                                            {},
                                            {QI::CheckPos(spgr_path), QI::CheckPos(mprage_path)},
+                                           mask.Get(),
                                            verbose,
                                            simulate.Get(),
                                            subregion.Get());

@@ -1,13 +1,12 @@
 // #define QI_DEBUG_BUILD 1
+#include "ss_model.h"
 #include "Macro.h"
 #include "rufis_ss.hpp"
-#include "ss_model.h"
 
-using AugMat = Eigen::Matrix<double, 2, 2>; // Short for Augmented Matrix
-using AugVec = Eigen::Vector<double, 2>;
-
-auto SSModel::signal(VaryingArray const &v, FixedArray const &) const -> QI_ARRAY(double) {
-    using T = double;
+auto SS_T1_Model::signal(VaryingArray const &v, FixedArray const &) const -> QI_ARRAY(double) {
+    using T      = double;
+    using AugMat = Eigen::Matrix<T, 2, 2>; // Short for Augmented Matrix
+    using AugVec = Eigen::Vector<T, 2>;
 
     T const &M0 = v[0];
     T const &R1 = 1. / v[1];
@@ -31,10 +30,8 @@ auto SSModel::signal(VaryingArray const &v, FixedArray const &) const -> QI_ARRA
         AugMat TR_mat  = Rrd * rf1;
         AugMat seg_mat = TR_mat.pow(sequence.spokes_per_seg);
 
-        auto const &name = sequence.prep[is];
-        auto const &p    = sequence.prep_pulses[name];
-        AugMat      rfp;
-        rfp << cos(B1 * p.FAeff), 0, //
+        AugMat rfp;
+        rfp << cos(B1 * sequence.prep_FA[is]), 0, //
             0, 1;
 
         // Calculate the steady-state just before the segment readout
