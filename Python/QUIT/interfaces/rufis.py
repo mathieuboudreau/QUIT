@@ -179,7 +179,7 @@ class SteadyState(QI.FitCommand):
 
     def __init__(self, **kwargs):
         if 'fitT2' in kwargs and kwargs['fitT2']:
-            self._param_files = ['M0', 'T1', 'T2', 'B1']
+            self._param_files = ['M0', 'T1', 'T2', 'f0', 'B1']
         else:
             self._param_files = ['M0', 'T1', 'B1']
         super(SteadyState, self).__init__(**kwargs)
@@ -201,7 +201,7 @@ class SteadyStateSim(QI.SimCommand):
 
     def __init__(self, **kwargs):
         if 'fitT2' in kwargs and kwargs['fitT2']:
-            self._param_files = ['M0', 'T1', 'T2', 'B1']
+            self._param_files = ['M0', 'T1', 'T2', 'f0', 'B1']
         else:
             self._param_files = ['M0', 'T1', 'B1']
         super(SteadyStateSim, self).__init__(**kwargs)

@@ -12,7 +12,8 @@ auto SS_T1T2_Model::signal(VaryingArray const &v, FixedArray const &) const -> Q
     T const &M0     = v[0];
     T const &R1     = 1. / v[1];
     T const &R2     = 1. / v[2];
-    T const &B1plus = v[3];
+    T const &f0     = v[3];
+    T const &B1plus = v[4];
 
     // Relaxation
     AugMat R;
@@ -30,10 +31,10 @@ auto SS_T1T2_Model::signal(VaryingArray const &v, FixedArray const &) const -> Q
 
     QI_DBMAT(R);
     // Useful for later
-    auto RF = [&R, &B1plus](double const B1nom, double const tau, double const df) {
+    auto RF = [&R, &f0, &B1plus](double const B1nom, double const tau, double const df) {
         AugMat  rf;
         T const B1 = B1plus * B1nom;
-        T const dw = 2. * M_PI * df;
+        T const dw = 2. * M_PI * (f0 - df);
         rf << 0, dw, 0, 0, //
             -dw, 0, B1, 0, //
             0, -B1, 0, 0,  //
