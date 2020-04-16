@@ -184,7 +184,7 @@ class BaseCommand(CommandLine):
             fname = '_input.json'
             with open(fname, 'w') as outfile:
                 json.dump(self._json, outfile, indent=2)
-            self.inputs.json = path.abspath(fname)
+            self.inputs.json = fname
         return super()._parse_inputs(skip)
 
 
