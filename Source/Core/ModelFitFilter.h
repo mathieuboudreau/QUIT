@@ -24,6 +24,7 @@
 #include "itkImageRegionIteratorWithIndex.h"
 #include "itkImageToImageFilter.h"
 #include "itkTimeProbe.h"
+#include "itkTotalProgressReporter.h"
 #include "itkVariableLengthVector.h"
 #include "itkVectorImage.h"
 
@@ -119,6 +120,8 @@ class ModelFitFilter
             m_subregion    = RegionFromString<TRegion>(subregion);
             m_hasSubregion = true;
         }
+        this->DynamicMultiThreadingOn();
+        this->ThreaderUpdateProgressOff();
     }
 
     void SetInput(unsigned int i, const TInputImage *image) override {
@@ -438,13 +441,15 @@ class ModelFitFilter
         }
 
         Info(m_verbose, "Processing...");
+        Self *processObjectForThreader = this->GetThreaderUpdateProgress() ? this : nullptr;
         this->GetMultiThreader()->SetNumberOfWorkUnits(this->GetNumberOfWorkUnits());
+        this->GetMultiThreader()->SetUpdateProgress(this->GetThreaderUpdateProgress());
         this->GetMultiThreader()->template ParallelizeImageRegion<ImageDim>(
             region,
             [this](const typename TOutputImage::RegionType &outputRegion) {
                 this->DynamicThreadedGenerateData(outputRegion);
             },
-            this);
+            processObjectForThreader);
         Info(m_verbose, "Finished processing.");
     }
 
@@ -502,6 +507,10 @@ class ModelFitFilter
         FixedArray   fixed;
         CovarArray * covar = m_covar ? new CovarArray : nullptr;
 
+        itk::TotalProgressReporter progress(
+            this,
+            m_hasSubregion ? m_subregion.GetNumberOfPixels() :
+                             this->GetOutput(0)->GetRequestedRegion().GetNumberOfPixels());
         while (!input_iters[0].IsAtEnd()) {
             if (!mask || mask_iter.Get()) {
                 for (int b = 0; b < m_blocks; b++) {
@@ -647,6 +656,7 @@ class ModelFitFilter
             }
             ++flag_iter;
             ++rmse_iter;
+            progress.CompletedPixel();
         }
     }
 }; // namespace QI
