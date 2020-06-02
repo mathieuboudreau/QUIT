@@ -33,15 +33,15 @@ struct RamaniModel : QI::Model<double, double, 5, 3, 1, 5> {
     const std::shared_ptr<QI::InterpLineshape> interp = nullptr;
 
     std::array<const std::string, NV> const varying_names{
-        {"RM0a"s, "f_over_R_af"s, "T2_b"s, "T1_a_over_T2_a"s, "gM0_a"s}};
+        {"gM0_a"s, "F_over_R_a"s, "T2_b"s, "T1_a_over_T2_a"s, "RM0a"s}};
     std::array<const std::string, 6> const derived_names{
         {"PD"s, "T1_f"s, "T2_f"s, "k_bf"s, "f_b"s}};
     std::array<const std::string, NF> const fixed_names{{"f0"s, "B1"s, "T1_app"}};
 
     FixedArray const   fixed_defaults{0.0, 1.0, 1.0};
-    VaryingArray const bounds_lo{2, 1.e-12, 1.e-6, 1, 0.5};
-    VaryingArray const bounds_hi{1e2, 1, 100.e-6, 50., 1.5};
-    VaryingArray const start{10.0, 0.1, 10.e-6, 25., 1.};
+    VaryingArray const bounds_lo{0.5, 1.e-12, 1.e-6, 1, 2};
+    VaryingArray const bounds_hi{1.5, 1, 100.e-6, 100., 1e2};
+    VaryingArray const start{1., 0.1, 10.e-6, 25., 10.};
 
     int input_size(const int /* Unused */) const { return sequence.size(); }
 
@@ -49,12 +49,12 @@ struct RamaniModel : QI::Model<double, double, 5, 3, 1, 5> {
     auto signal(const Eigen::ArrayBase<Derived> &v, const FixedArray &f) const
         -> QI_ARRAY(typename Derived::Scalar) {
         // Use Ramani's notation
-        const auto &Rb      = 1.0; // Fix
-        const auto &RM0a    = v[0];
-        const auto &fterm   = v[1];
+        const auto &Rb      = 2.5; // Fix
+        const auto &gM0a    = v[0];
+        const auto &FRa     = v[1];
         const auto &T2b     = v[2];
         const auto &T1a_T2a = v[3];
-        const auto &gM0a    = v[4];
+        const auto &RM0a    = v[4];
         const auto &f0      = f[0];
         const auto &B1      = f[1];
 
@@ -78,37 +78,46 @@ struct RamaniModel : QI::Model<double, double, 5, 3, 1, 5> {
                             sqrt(sequence.pulse.p2 / (sequence.Trf * sequence.TR));
         const auto R_rfb = M_PI * (w_cwpe * w_cwpe) * lsv;
 
-        const auto S = gM0a * (Rb * RM0a * fterm + R_rfb + Rb + RM0a) /
-                       ((RM0a * fterm) * (Rb + R_rfb) +
+        const auto S = gM0a * (Rb * RM0a * FRa + R_rfb + Rb + RM0a) /
+                       ((RM0a * FRa) * (Rb + R_rfb) +
                         (1.0 + pow(w_cwpe / (2 * M_PI * sequence.sat_f0), 2.0) * T1a_T2a) *
                             (R_rfb + Rb + RM0a));
+        QI_DBVEC(v)
+        QI_DBVEC(w_cwpe)
+        QI_DBVEC(R_rfb)
+        QI_DBVEC(S)
+
         return S;
     }
 
     void derived(const VaryingArray &p, const FixedArray &f, DerivedArray &d) const {
         // Convert from the fitted parameters to useful ones
-        const auto &Rb      = 1.0; // Fix
-        const auto &RM0a    = p[0];
-        const auto &fterm   = p[1];
+        const auto &Rb      = 2.5; // Fix
+        const auto &gM0a    = p[0];
+        const auto &FRa     = p[1];
         const auto &T2b     = p[2];
         const auto &T1a_T2a = p[3];
-        const auto &gM0a    = p[4];
+        const auto &RM0a    = p[4];
         const auto &T1_obs  = f[2];
 
         const auto R_obs = 1 / T1_obs;
-        const auto Ra    = ((Rb < R_obs) && (Rb - R_obs + RM0a) > 0) ?
-                            R_obs :
-                            R_obs / (1.0 + ((RM0a * fterm * (Rb - R_obs)) / (Rb - R_obs + RM0a)));
-        const auto f_b  = fterm * Ra / (1.0 + fterm * Ra);
+        // ((Rb < R_obs) && (Rb - R_obs + RM0a) > 0) ?
+        //                     R_obs :
+        const auto Ra   = R_obs / (1.0 + ((RM0a * FRa * (Rb - R_obs)) / (Rb - R_obs + RM0a)));
+        const auto F    = FRa * Ra;
+        const auto f_b  = F / (1.0 - F);
         const auto k_bf = RM0a * f_b / (1.0 - f_b);
 
-        //{"PD"s, "T1_f"s, "T2_f"s, "T2_b"s, "k_bf"s, "f_b"s}
+        //{"PD"s, "T1_f"s, "T2_f"s, "k_bf"s, "f_b"s}
         d[0] = gM0a;
-        d[1] = 1.0 / Ra;
-        d[2] = p[1] / T1a_T2a;
-        d[3] = T2b;
-        d[4] = k_bf;
-        d[5] = f_b;
+        d[1] = QI::Clamp(1.0 / Ra, 0., 5.0);
+        d[2] = QI::Clamp(FRa / (F * T1a_T2a), 0., 3.);
+        d[3] = QI::Clamp(k_bf, 0., 20.);
+        d[4] = QI::Clamp(100. * f_b, 0., 100.);
+        QI_DBVEC(p)
+        QI_DB(R_obs)
+        QI_DB(Ra)
+        QI_DBVEC(d)
     }
 };
 
