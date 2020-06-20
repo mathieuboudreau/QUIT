@@ -12,20 +12,23 @@
 #include "Args.h"
 #include "Util.h"
 #include "itkMultiThreaderBase.h"
+#include <sstream>
 
 namespace QI {
 
 void ParseArgs(args::ArgumentParser &parser, int argc, char **argv, const args::Flag &verbose) {
+    std::stringstream temp;
+    parser.Help(temp);
     try {
         parser.ParseCLI(argc, argv);
         QI::Info(verbose, "Starting {} {}", argv[0], QI::GetVersion());
     } catch (args::Help) {
-        fmt::print("{}\n", parser);
+        fmt::print("{}\n", temp.str());
         exit(EXIT_SUCCESS);
     } catch (args::ParseError e) {
-        QI::Fail("{}\n{}", parser, e.what());
+        QI::Fail("{}\n{}", temp.str(), e.what());
     } catch (args::ValidationError e) {
-        QI::Fail("{}\n{}", parser, e.what());
+        QI::Fail("{}\n{}", temp.str(), e.what());
     }
 }
 
@@ -34,18 +37,20 @@ void ParseArgs(args::ArgumentParser &parser,
                char **               argv,
                const args::Flag &    verbose,
                args::ValueFlag<int> &threads) {
+    std::stringstream temp;
+    parser.Help(temp);
     try {
         parser.ParseCLI(argc, argv);
         QI::Info(verbose, "Starting {} {}", argv[0], QI::GetVersion());
         QI::Log(verbose, "Max threads = {}", threads.Get());
         itk::MultiThreaderBase::SetGlobalMaximumNumberOfThreads(threads.Get());
     } catch (args::Help) {
-        fmt::print("{}\n", parser);
+        fmt::print("{}\n", temp.str());
         exit(EXIT_SUCCESS);
     } catch (args::ParseError e) {
-        QI::Fail("{}\n{}", parser, e.what());
+        QI::Fail("{}\n{}", temp.str(), e.what());
     } catch (args::ValidationError e) {
-        QI::Fail("{}\n{}", parser, e.what());
+        QI::Fail("{}\n{}", temp.str(), e.what());
     }
 }
 
