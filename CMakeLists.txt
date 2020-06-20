@@ -29,12 +29,9 @@ find_package(ITK 5.0.0 REQUIRED
                 ITKCommon
                 ITKConnectedComponents
                 ITKFFT
-                ITKIOImageBase
-                ITKIOTransformBase
                 ITKImageCompose
                 ITKImageFeature
                 ITKImageFilterBase
-                ITKImageGrid
                 ITKImageIntensity
                 ITKImageStatistics
                 ITKLabelMap
